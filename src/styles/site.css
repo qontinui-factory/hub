@@ -1,0 +1,55 @@
+/* The factory floor at night. Colours come only from @qontinui/design-tokens
+   (domain_spec/visual-system): red marks a state someone had to act on (a
+   failed inspection that was reworked); amber is the "not recorded" floor. */
+:root {
+  color-scheme: dark;
+  --floor: var(--qontinui-surface-canvas);
+  --panel: var(--qontinui-surface-raised);
+  --ink: var(--qontinui-text-primary);
+  --ink-2: var(--qontinui-text-secondary);
+  --ink-3: var(--qontinui-text-muted);
+  --rail: var(--qontinui-border-default);
+  --glow: var(--qontinui-brand-primary);
+  --act: var(--qontinui-error);
+  --unknown: var(--qontinui-warning);
+  --ok: var(--qontinui-success);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--floor); color: var(--ink); }
+body { font-family: Inter, system-ui, sans-serif; line-height: 1.55; }
+a { color: var(--glow); }
+main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
+.masthead { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--rail); }
+.wordmark { font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: .02em; }
+.wordmark span { color: var(--ink-3); font-weight: 400; }
+.masthead nav { display: flex; gap: 16px; flex-wrap: wrap; }
+.masthead nav a { color: var(--ink-2); text-decoration: none; }
+.hero { display: grid; gap: 24px; padding: 40px 0; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .hero { grid-template-columns: 2fr 3fr; align-items: center; } }
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 12px; }
+.hero p, .lede { color: var(--ink-2); }
+.exhibits h2 { border-top: 1px solid var(--rail); padding-top: 24px; }
+.exhibit { background: var(--panel); border: 1px solid var(--rail); border-radius: 12px; padding: 20px; margin: 16px 0; }
+.exhibit header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.exhibit h3 { margin: 0; }
+.tag { font-size: .75rem; color: var(--ink-3); border: 1px solid var(--rail); border-radius: 999px; padding: 2px 8px; }
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+.fact { border-left: 2px solid var(--glow); padding-left: 10px; }
+.fact dt { font-size: .75rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+.fact dd { margin: 2px 0 0; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.fact.not-recorded { border-left-color: var(--unknown); }
+.fact.not-recorded dd { color: var(--unknown); font-size: 1rem; }
+.line { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.part { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 8px 12px; border: 1px dashed var(--rail); border-radius: 8px; }
+.part.landed { border-style: solid; }
+.stamps { display: inline-flex; gap: 4px; align-items: center; }
+.stamp { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.stamp.pass { background: var(--ok); }
+.stamp.rework { background: var(--act); }
+.stamps.not-recorded, .gaps { color: var(--unknown); font-size: .875rem; }
+.verify { margin-top: 12px; color: var(--ink-2); font-size: .875rem; }
+.verify code { word-break: break-all; }
+.station { border-top: 1px solid var(--rail); padding: 24px 0; }
+.scene-loading, .scene-error { padding: 24px; border: 1px dashed var(--rail); border-radius: 8px; color: var(--ink-3); }
+.foot { border-top: 1px solid var(--rail); color: var(--ink-3); font-size: .875rem; padding: 16px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

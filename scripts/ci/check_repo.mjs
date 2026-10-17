@@ -1,8 +1,8 @@
-// Phase 0 check: the repository carries the files every later phase relies on.
-// Phase 1 replaces this lane with the site build, the D1 sha check and the A1 guard.
+// The repository carries the files every build relies on.
+// The build itself (D1 sha check, A1 guard) runs as its own ci.toml step.
 import { existsSync } from 'node:fs';
 
-const required = ['README.md', 'LICENSE', '.gitignore', '.qontinui/ci.toml'];
+const required = ['README.md', 'LICENSE', '.gitignore', '.qontinui/ci.toml', 'package.json', 'pnpm-lock.yaml', 'exhibits.yaml'];
 const missing = required.filter((p) => !existsSync(p));
 if (missing.length) {
   console.error(`missing: ${missing.join(', ')}`);

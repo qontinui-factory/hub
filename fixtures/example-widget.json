@@ -1,0 +1,113 @@
+{
+  "fixture_source": "synthetic (plan A4): invented slug and repo, built to the build-record/1 allowlist shape; content_sha256 computed by the web's recipe json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False)",
+  "snapshot": {
+    "public_slug": "example-widget",
+    "version": 1,
+    "published_at": "2026-10-03T18:00:00Z",
+    "content_sha256": "db7f9bfb9c1cc1f6ad3f612578ff3b9f43e697628320dcb7a5f790e06d7aaad7",
+    "document": {
+      "schema": "build-record/1",
+      "generated_at": "2026-10-17T09:00:00Z",
+      "product": {
+        "slug": "example-widget",
+        "title": "Example Widget",
+        "repos": [
+          "example/widget"
+        ],
+        "window_start": "2026-10-01T08:00:00Z",
+        "window_end": "2026-10-03T17:30:00Z"
+      },
+      "work_units": [
+        {
+          "slug": "2026-10-01-example-widget-core",
+          "title": "Widget core",
+          "status": "shipped",
+          "vetted_at": "2026-10-01T09:10:00Z",
+          "shipped_at": "2026-10-02T15:00:00Z"
+        },
+        {
+          "slug": "2026-10-02-example-widget-polish",
+          "title": "Widget polish",
+          "status": "shipped",
+          "vetted_at": "2026-10-02T16:00:00Z",
+          "shipped_at": "2026-10-03T17:30:00Z"
+        }
+      ],
+      "timeline": [
+        {
+          "at": "2026-10-01T08:00:00Z",
+          "work_unit": "2026-10-01-example-widget-core",
+          "from_status": null,
+          "to_status": "draft"
+        },
+        {
+          "at": "2026-10-01T09:10:00Z",
+          "work_unit": "2026-10-01-example-widget-core",
+          "from_status": "draft",
+          "to_status": "vetted"
+        },
+        {
+          "at": "2026-10-01T09:20:00Z",
+          "work_unit": "2026-10-01-example-widget-core",
+          "from_status": "vetted",
+          "to_status": "in_progress"
+        },
+        {
+          "at": "2026-10-02T15:00:00Z",
+          "work_unit": "2026-10-01-example-widget-core",
+          "from_status": "in_progress",
+          "to_status": "shipped"
+        },
+        {
+          "at": "2026-10-02T16:00:00Z",
+          "work_unit": "2026-10-02-example-widget-polish",
+          "from_status": "draft",
+          "to_status": "vetted"
+        },
+        {
+          "at": "2026-10-03T17:30:00Z",
+          "work_unit": "2026-10-02-example-widget-polish",
+          "from_status": "in_progress",
+          "to_status": "shipped"
+        }
+      ],
+      "prs": [
+        {
+          "repo": "example/widget",
+          "number": 1,
+          "title": "feat: widget core",
+          "opened_at": "2026-10-01T11:00:00Z",
+          "landed_at": "2026-10-02T15:00:00Z",
+          "ci_duration_secs": 540,
+          "attempts": 3
+        },
+        {
+          "repo": "example/widget",
+          "number": 2,
+          "title": "feat: widget polish",
+          "opened_at": "2026-10-03T10:00:00Z",
+          "landed_at": "2026-10-03T17:30:00Z",
+          "ci_duration_secs": 420,
+          "attempts": 1
+        }
+      ],
+      "gates": {
+        "registered": 3,
+        "cleared": 3
+      },
+      "sessions": {
+        "count": null,
+        "unknown_reason": "sessions.count: census_provisional"
+      },
+      "wall_clock_secs": 207000,
+      "self_corrections": {
+        "red_ci_fixed": 2,
+        "review_findings_fixed": 5,
+        "gate_reopens": 0
+      },
+      "unknowns": [
+        "sessions.count: census_provisional"
+      ]
+    }
+  }
+}

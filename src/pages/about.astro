@@ -1,0 +1,11 @@
+---
+import Gallery from '../layouts/Gallery.astro';
+---
+<Gallery title="About the records — build.qontinui.io">
+  <h1>About the records</h1>
+  <p>A build record is the factory's own account of how a product was built: the plans it worked from, when each was vetted and shipped, the pull requests that landed, how often CI sent a change back, and how long it all took.</p>
+  <h2>What a record withholds</h2>
+  <p>A public record passes an explicit allowlist. It keeps plan slugs and titles, statuses, timestamps, public repository names, pull-request numbers and titles, and counts. Code, private repository names, device, session and user identifiers, and free-text notes are withheld. Where the factory has no measurement, the record says so and gives the reason, rather than printing a zero.</p>
+  <h2>Check one yourself</h2>
+  <p>Each exhibit shows its snapshot's <code>content_sha256</code>. Fetch the record from <code>https://api.qontinui.io/api/v1/public/build-records/&lt;slug&gt;</code>, serialise its <code>document</code> with sorted keys, no spaces and non-ASCII characters kept as-is, encode it as UTF-8, and take the SHA-256. This site does exactly that at build time and refuses to build on a mismatch.</p>
+</Gallery>

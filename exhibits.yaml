@@ -1,0 +1,6 @@
+# The exhibits the gallery shows, in order (plan D2: declared, not discovered).
+# `hub publish` appends a slug; `hub unpublish` removes it (AI2, B6).
+# Until a real record is public (Phase 3), the build reads fixtures (A4).
+exhibits:
+  - slug: example-widget
+    fixture: fixtures/example-widget.json

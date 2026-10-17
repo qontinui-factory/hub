@@ -4,3 +4,5 @@ dist/
 # Studio publish lock and journals (plan D3): never committed.
 .studio-journal-*.json
 *.lock
+public/_hub/
+src/data/exhibits.json

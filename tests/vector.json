@@ -1,0 +1,15 @@
+{
+  "source": "computed by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False), the web's recipe",
+  "value": {
+    "b": "Pizzeria — café ✓",
+    "a": [
+      1,
+      {
+        "z": null,
+        "ä": "ö"
+      }
+    ],
+    "🍕": "astral key"
+  },
+  "sha256": "1c94c43d39ea6465c2e17e501c47ad33696bd29c3e4130982d53d6abfecec9d9"
+}

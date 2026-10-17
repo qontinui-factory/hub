@@ -1,0 +1,23 @@
+---
+import Gallery from '../layouts/Gallery.astro';
+import ScenePlayer from '../components/ScenePlayer.jsx';
+const stations = [
+  ['s2-digital-twin', 'The digital twin', 'GitHub, CI, machines and sessions, mirrored into one record the agents can ask.'],
+  ['s3-gates-continuations', 'Gates and continuations', 'A session registers what it waits on and ends; the factory resumes it when the condition holds.'],
+  ['s4-merge-train', 'The merge train', 'Pull requests rebased, tested and landed in order. A conflicted part steps out and rejoins at the back.'],
+  ['s5-fleet', 'The fleet', 'Sessions on several machines, each in its own worktree, declaring what they hold.'],
+  ['s6-self-correction', 'Self-correction', 'CI goes red; the session reads the log, pushes a fix, and goes round again. Nobody is paged.'],
+  ['s7-gui-automation', 'Model-based GUI automation', 'Where it started: a state graph learned from an app, then walked to a goal.'],
+];
+---
+<Gallery title="The tour — build.qontinui.io">
+  <h1>The tour</h1>
+  <p class="lede">Six stations of the machinery. These scenes are illustrative, and each says so on screen.</p>
+  {stations.map(([scene, title, text]) => (
+    <section class="station">
+      <h2>{title}</h2>
+      <p>{text}</p>
+      <ScenePlayer client:visible scene={scene} />
+    </section>
+  ))}
+</Gallery>

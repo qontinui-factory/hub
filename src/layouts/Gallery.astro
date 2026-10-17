@@ -1,0 +1,30 @@
+---
+import '@qontinui/design-tokens/css';
+import '../styles/site.css';
+const { title, description = 'The visitors’ gallery of the Qontinui software factory.' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module" src="/_hub/ui-bridge.js" is:inline></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="wordmark" href="/">Qontinui <span>factory floor</span></a>
+      <nav>
+        <a href="/">Gallery</a>
+        <a href="/tour">Tour</a>
+        <a href="/about">About the records</a>
+      </nav>
+    </header>
+    <main><slot /></main>
+    <footer class="foot">
+      <p>Built by the Qontinui software factory. Every number on this site comes from a published build record; what a record does not know is shown as not recorded.</p>
+    </footer>
+  </body>
+</html>

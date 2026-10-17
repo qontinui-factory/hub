@@ -1,0 +1,23 @@
+---
+import Gallery from '../layouts/Gallery.astro';
+import Exhibit from '../components/Exhibit.astro';
+import ScenePlayer from '../components/ScenePlayer.jsx';
+import exhibits from '../data/exhibits.json';
+---
+<Gallery title="build.qontinui.io — the factory floor">
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>The factory floor, after hours.</h1>
+      <p>Below, the production line of a software factory that runs without a human in the loop. Each exhibit is one real run, replayed from its published build record. The numbers do the bragging.</p>
+    </div>
+    <div class="hero-scene">
+      <ScenePlayer client:visible scene="s1-plan-lifecycle" autoPlay loop />
+    </div>
+  </section>
+  <section class="exhibits" aria-label="Exhibits">
+    <h2>On the line</h2>
+    {exhibits.length === 0
+      ? <p class="empty">No build record is published yet. The line is quiet.</p>
+      : exhibits.map((e) => <Exhibit exhibit={e} />)}
+  </section>
+</Gallery>

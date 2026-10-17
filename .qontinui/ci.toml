@@ -1,9 +1,21 @@
 # CI manifest for coord's runner-as-CI-node lane (plan
 # 2026-10-17-build-qontinui-io-factory-hub, C2 step 3). Commands are argv
-# arrays, never shell strings. Phase 1 adds the site build (which runs the D1
-# content_sha256 check and the A1 guard), lint and tests.
+# arrays, never shell strings. The build runs the D1 content_sha256 check and
+# the A1 guard (PR mode: fails only for a bundle this PR touches, AI4.5).
 version = 1
 
 [[steps]]
 name = "repo-check"
 command = ["node", "scripts/ci/check_repo.mjs"]
+
+[[steps]]
+name = "install"
+command = ["pnpm", "install", "--frozen-lockfile"]
+
+[[steps]]
+name = "build"
+command = ["pnpm", "run", "build:ci"]
+
+[[steps]]
+name = "test"
+command = ["pnpm", "test"]
