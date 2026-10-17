@@ -1,5 +1,7 @@
 # CI manifest for coord's runner-as-CI-node lane (plan
-# 2026-10-17-build-qontinui-io-factory-hub, C2 step 3). Commands are argv
+# 2026-10-17-build-qontinui-io-factory-hub, C2 step 3). This repo's CI mode is
+# GitHub (AJ2), so PR checks run in .github/workflows/ci.yml; this manifest
+# mirrors the same steps for a Local-mode run. Commands are argv
 # arrays, never shell strings. The build runs the D1 content_sha256 check and
 # the A1 guard (PR mode: fails only for a bundle this PR touches, AI4.5).
 version = 1

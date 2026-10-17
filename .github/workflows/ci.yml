@@ -1,0 +1,23 @@
+# PR checks (plan 2026-10-17-build-qontinui-io-factory-hub, AN1). This repo's
+# CI mode is GitHub (AJ2): coord observes these Actions checks. Public repo,
+# so GitHub-hosted runners cost $0.
+name: ci
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: node scripts/ci/check_repo.mjs
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:ci
+      - run: pnpm test
