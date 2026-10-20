@@ -4,13 +4,16 @@
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.24.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "prepare-site": "node scripts/copy-scene-assets.mjs && node scripts/build-boot.mjs && node scripts/fetch-exhibits.mjs",
     "build": "pnpm run prepare-site && astro build",
     "build:ci": "HUB_GUARD=pr pnpm run build",
     "dev": "pnpm run prepare-site && astro dev",
-    "test": "vitest run"
+    "test": "vitest run",
+    "hub": "node bin/hub.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.0.0",
@@ -27,5 +30,8 @@
   "devDependencies": {
     "esbuild": "0.24.2",
     "vitest": "5.0.3"
+  },
+  "bin": {
+    "hub": "bin/hub.mjs"
   }
 }
