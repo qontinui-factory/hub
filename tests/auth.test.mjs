@@ -332,12 +332,17 @@ describe('the reminder', () => {
   it('stays registered when an old one cannot be withdrawn', () => {
     const call = (tool) => {
       if (tool === 'coord_register_gate') return { gate_id: 'new' };
-      if (tool === 'coord_gate_list') return { gates: [{ gate_id: 'foreign', anchor: { phase_name: 'hub auth: refresh token expires 2026-11-01' } }] };
+      if (tool === 'coord_gate_list') return { gates: [{ gate_id: 'new' }, { gate_id: 'foreign', anchor: { phase_name: 'hub auth: refresh token expires 2026-11-01' } }] };
       throw new Error('registered by another device');
     };
     const r = registerReminder(call, { dueSecs: 1, dueDate: 'x', assumed: false });
     expect(r).toMatchObject({ registered: true, gateId: 'new', withdrawn: [] });
     expect(r.notWithdrawn[0]).toMatch(/foreign .*another device/);
+  });
+  it('is not registered when the read-back cannot find it', () => {
+    const r = registerReminder((t) => (t === 'coord_register_gate' ? { gate_id: 'new' } : { gates: [] }), { dueSecs: 1, dueDate: 'x', assumed: false });
+    expect(r.registered).toBe(false);
+    expect(r.why).toMatch(/read-back/);
   });
   it('withdraws nothing when the new one fails to register', () => {
     const tools = [];
@@ -370,7 +375,7 @@ describe('the reminder timing', () => {
     const fresh = jwt({ exp: Math.floor(Date.now() / 1000) + 3600, auth_time: Math.floor(Date.now() / 1000) });
     const e = env();
     const regs = [];
-    const call = (tool, args) => (tool === 'coord_register_gate' ? (regs.push(args), { gate_id: 'g' }) : { gates: [] });
+    const call = (tool, args) => (tool === 'coord_register_gate' ? (regs.push(args), { gate_id: 'g' }) : { gates: [{ gate_id: 'g' }] });
     const { d, logs } = deps(e, { call });
     d.fetchImpl = async (url) =>
       url.endsWith('/oauth2/token')
@@ -378,7 +383,7 @@ describe('the reminder timing', () => {
         : { ok: true, status: 200, json: async () => ({ tenants: [{ id: TENANT_ID, roles: ['admin'] }] }) };
     expect(await main(['auth', 'set'], d)).toBe(0);
     expect(Math.abs(regs[0].predicate.duration_secs - 27 * 86400)).toBeLessThan(5);
-    expect(logs.join('\n')).toMatch(/sign-in time unknown/);
+    expect(logs.join('\n')).toMatch(/timed from now/);
   });
 });
 

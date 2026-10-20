@@ -96,7 +96,7 @@ export async function storeAndCheck(refreshToken, deps) {
   }
   const notes = [
     assumed ? 'validity unread, assumed 30 days' : null,
-    signedIn ? null : 'sign-in time unknown, timed from now: re-run sooner if this token came from an old browser session',
+    signedIn ? null : 'timed from now: right for a fresh sign-in; if this token came from an older browser session, re-run sooner',
     r.withdrawn.length ? `withdrew ${r.withdrawn.join(', ')}` : null,
     r.notWithdrawn.length ? `could NOT withdraw ${r.notWithdrawn.join(', ')}` : null,
   ].filter(Boolean);
