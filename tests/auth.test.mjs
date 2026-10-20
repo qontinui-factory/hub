@@ -340,9 +340,12 @@ describe('the reminder', () => {
     expect(r.notWithdrawn[0]).toMatch(/foreign .*another device/);
   });
   it('is not registered when the read-back cannot find it', () => {
-    const r = registerReminder((t) => (t === 'coord_register_gate' ? { gate_id: 'new' } : { gates: [] }), { dueSecs: 1, dueDate: 'x', assumed: false });
+    const tools = [];
+    const old = { gate_id: 'old', anchor: { phase_name: 'hub auth: refresh token expires 2026-11-01' } };
+    const r = registerReminder((t) => (tools.push(t), t === 'coord_register_gate' ? { gate_id: 'new' } : { gates: [old] }), { dueSecs: 1, dueDate: 'x', assumed: false });
     expect(r.registered).toBe(false);
     expect(r.why).toMatch(/read-back/);
+    expect(tools).not.toContain('coord_withdraw_gate'); // the old reminder still stands
   });
   it('withdraws nothing when the new one fails to register', () => {
     const tools = [];
