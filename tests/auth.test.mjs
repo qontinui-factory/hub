@@ -205,6 +205,21 @@ describe('a refused or interrupted import keeps the stored credential', () => {
   });
 });
 
+describe('a failed credential write', () => {
+  it('exits 1 naming the error code', async () => {
+    const e = env();
+    await main(['auth', 'set'], deps(e).d);
+    chmodSync(join(e.dir, 'state'), 0o500);
+    try {
+      const { d, logs } = deps(e);
+      expect(await main(['auth', 'set'], d)).toBe(1);
+      expect(logs.join('\n')).toMatch(/unexpected EACCES/);
+    } finally {
+      chmodSync(join(e.dir, 'state'), 0o700);
+    }
+  });
+});
+
 describe('findings', () => {
   it('posts one for an authoritative refusal, none for a transient failure', async () => {
     for (const [grant, posts] of [['invalid', true], ['503', false]]) {
@@ -257,7 +272,7 @@ describe('hub auth set', () => {
     expect(await readStdinSecret(Readable.from([`${RT}\n`]))).toBe(RT);
   });
   it('reads a TTY hidden, honouring backspace and ignoring arrow keys', async () => {
-    const tty = Readable.from(['refresh-tokeX', '\u007f', 'n\u001b[D-value', '\r']);
+    const tty = Readable.from(['refresh-tokeX', '\u007f', 'n\u001b[D-val', '\u001bOAue', '\r']);
     const modes = [];
     tty.isTTY = true;
     tty.setRawMode = (m) => modes.push(m);
@@ -333,7 +348,7 @@ describe('the reminder', () => {
 });
 
 describe('the storage-state file', () => {
-  it('exits 7 when it cannot be deleted after a good import', async () => {
+  it('exits 8 (6 and 7) when it cannot be deleted and the reminder was not registered', async () => {
     const e = env();
     const sub = join(e.dir, 'ro');
     mkdirSync(sub);
@@ -342,11 +357,28 @@ describe('the storage-state file', () => {
     chmodSync(sub, 0o500);
     try {
       const { d, logs } = deps(e);
-      expect(await main(['auth', 'import', file], d)).toBe(7);
+      expect(await main(['auth', 'import', file], d)).toBe(8); // no coord door in the test: also not registered
       expect(logs.join('\n')).toMatch(/delete it by hand/);
     } finally {
       chmodSync(sub, 0o700);
     }
+  });
+});
+
+describe('the reminder timing', () => {
+  it('reads an auth_time at the refresh itself as unknown, not as a fresh sign-in', async () => {
+    const fresh = jwt({ exp: Math.floor(Date.now() / 1000) + 3600, auth_time: Math.floor(Date.now() / 1000) });
+    const e = env();
+    const regs = [];
+    const call = (tool, args) => (tool === 'coord_register_gate' ? (regs.push(args), { gate_id: 'g' }) : { gates: [] });
+    const { d, logs } = deps(e, { call });
+    d.fetchImpl = async (url) =>
+      url.endsWith('/oauth2/token')
+        ? { ok: true, status: 200, json: async () => ({ id_token: fresh }) }
+        : { ok: true, status: 200, json: async () => ({ tenants: [{ id: TENANT_ID, roles: ['admin'] }] }) };
+    expect(await main(['auth', 'set'], d)).toBe(0);
+    expect(Math.abs(regs[0].predicate.duration_secs - 27 * 86400)).toBeLessThan(5);
+    expect(logs.join('\n')).toMatch(/sign-in time unknown/);
   });
 });
 

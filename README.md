@@ -58,4 +58,4 @@ node bin/hub.mjs auth refresh                      # exchange once, rewrite the 
 - Exit codes: 0 ok; 1 unexpected error; 2 usage; 3 the token or the account
   was refused (sign in again); 4 transient (retry); 6 stored and checked, but
   the reminder was not registered; 7 stored, but the storage-state file could
-  not be deleted (delete it by hand).
+  not be deleted (delete it by hand); 8 both 6 and 7.

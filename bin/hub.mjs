@@ -11,7 +11,7 @@
 // Exit codes: 0 ok; 1 an unexpected error; 2 usage or nothing stored; 3 the
 // credential was refused (re-import needed); 4 a transient failure (retry);
 // 6 stored and checked, but the expiry reminder gate was NOT registered;
-// 7 stored, but the storage-state file could not be deleted.
+// 7 stored, but the storage-state file could not be deleted; 8 both 6 and 7.
 // Nothing is written unless the new token both exchanges and passes the admin
 // check, so a refused or interrupted import leaves the stored credential as it was.
 // A token is never printed and never accepted on argv.
@@ -36,14 +36,17 @@ export async function readStdinSecret(stdin = process.stdin, stderr = process.st
       for await (const chunk of stdin) {
         for (const ch of chunk.toString('utf8')) {
           if (escape) {
-            // Skip an ANSI escape sequence (arrow keys and the like) to its final byte.
-            if (/[A-Za-z~]/.test(ch)) escape = false;
+            // Skip an ANSI escape sequence (arrow keys and the like) to its
+            // final byte; `[` and `O` (application cursor mode) introduce one.
+            if (escape === 'start' && (ch === '[' || ch === 'O')) escape = 'body';
+            else if (/[A-Za-z~]/.test(ch)) escape = false;
+            else escape = 'body';
             continue;
           }
           if (ch === '\r' || ch === '\n' || ch === '\u0004') return value.trim();
           if (ch === '\u0003') throw new AuthError('usage', 'cancelled');
           if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
-          else if (ch === '\u001b') escape = true;
+          else if (ch === '\u001b') escape = 'start';
           else if (ch >= ' ') value += ch; // other control characters are not part of a token
         }
       }
@@ -70,13 +73,20 @@ export async function storeAndCheck(refreshToken, deps) {
   const { idToken, exp, authTime } = await exchange(refreshToken, fetchImpl);
   const admin = await checkAdmin(env, fetchImpl, idToken);
   writeSecret(refreshTokenFile(env), `${refreshToken}\n`);
-  writeSecret(bearerFile(env), `${idToken}\n`);
+  try {
+    writeSecret(bearerFile(env), `${idToken}\n`);
+  } catch (err) {
+    log(`WARNING: the refresh token was stored but the bearer file was NOT updated (${err.code ?? err.message}); run \`hub auth refresh\``);
+    throw err;
+  }
   log(`stored the refresh token at ${refreshTokenFile(env)}; ID token valid until ${new Date(exp * 1000).toISOString()}; admin of ${admin.tenant}`);
-  // The refresh token lives from the sign-in that issued it, which the ID
-  // token's auth_time records (Cognito keeps it across refreshes); a token
-  // copied from an old browser session expires sooner than one minted now.
+  // The refresh token lives from the sign-in that issued it. The ID token's
+  // auth_time is the sign-in time per OIDC Core §2, and we ASSUME Cognito
+  // carries it across refresh grants; an auth_time at the refresh itself is
+  // read as unknown, not as a fresh sign-in, and the log says so either way.
   const { secs, assumed } = validity();
-  const issued = authTime ?? now();
+  const signedIn = authTime !== null && authTime < now() - 120 ? authTime : null;
+  const issued = signedIn ?? now();
   const dueSecs = Math.max(3600, Math.round(issued + secs - 3 * 86400 - now()));
   const dueDate = new Date((now() + dueSecs) * 1000).toISOString().slice(0, 10);
   const r = registerReminder(call, { dueSecs, dueDate, assumed });
@@ -86,7 +96,7 @@ export async function storeAndCheck(refreshToken, deps) {
   }
   const notes = [
     assumed ? 'validity unread, assumed 30 days' : null,
-    authTime ? null : 'sign-in time unread, timed from now',
+    signedIn ? null : 'sign-in time unknown, timed from now: re-run sooner if this token came from an old browser session',
     r.withdrawn.length ? `withdrew ${r.withdrawn.join(', ')}` : null,
     r.notWithdrawn.length ? `could NOT withdraw ${r.notWithdrawn.join(', ')}` : null,
   ].filter(Boolean);
@@ -121,7 +131,7 @@ export async function main(argv, deps) {
         unlinkSync(path); // it holds live session tokens; the hub keeps only the refresh token
       } catch (err) {
         log(`WARNING: could not delete ${path} (${err.code ?? err.message}); it holds live session tokens, delete it by hand`);
-        return 7;
+        return code === 6 ? 8 : 7;
       }
       log(`deleted ${path}`);
       return code;
