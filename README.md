@@ -42,8 +42,10 @@ node bin/hub.mjs auth check                        # admin role on the studio te
 node bin/hub.mjs auth refresh                      # exchange once, rewrite the bearer file
 ```
 
-- The token is read from stdin or the storage-state file only. A token on argv
-  is refused, and no command prints it.
+- The token is read from stdin or the storage-state file only. No command takes
+  a token argument, and none prints one.
+- Nothing is stored until the new token both exchanges and passes the admin
+  check, so a refused import leaves the previous credential in place.
 - `import` reads sessionStorage key `auth_bearer_refresh_token` (the key
   qontinui-web's `token-storage.ts` writes) from the file's `__sessionStorage`
   map.
@@ -51,6 +53,9 @@ node bin/hub.mjs auth refresh                      # exchange once, rewrite the 
   the refresh token expires, and withdraws the previous one. It needs the coord
   door at `$QONTINUI_WORKSPACE_ROOT/qontinui-claude-config/.claude/skills/coord-revive/coord-revive.sh`,
   or `HUB_COORD_REVIVE`.
-- Exit codes: 0 ok; 2 usage or nothing stored; 3 the token or the account was
-  refused (re-sign-in needed); 4 transient; 6 stored and checked, but the
-  reminder was not registered.
+- Only a refusal of the token or the account posts a coord finding; a transient
+  failure does not.
+- Exit codes: 0 ok; 1 unexpected error; 2 usage; 3 the token or the account
+  was refused (sign in again); 4 transient (retry); 6 stored and checked, but
+  the reminder was not registered; 7 stored, but the storage-state file could
+  not be deleted (delete it by hand).
