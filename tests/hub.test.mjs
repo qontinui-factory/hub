@@ -788,6 +788,58 @@ describe('second review fixes', () => {
   });
 });
 
+describe('third review fixes', () => {
+  it('stale-lock takeover is atomic: a second taker that wins the race keeps its lock; the first refuses', async () => {
+    const { acquireLock } = await import('../lib/hub/lock.mjs');
+    const { hostname } = await import('node:os');
+    const gitDir = tmp('hub-lock-');
+    const lock = join(gitDir, 'hub.lock');
+    writeFileSync(lock, `999999999 ${hostname()} publish dead\n`);
+    let releaseB;
+    // A has read the stale holder; B runs its whole takeover in between.
+    const takeA = () =>
+      acquireLock(gitDir, {
+        what: 'A',
+        hooks: { afterStaleRead: () => (releaseB = acquireLock(gitDir, { what: 'B' })) },
+      });
+    expect(takeA).toThrow(/changed hands/);
+    expect(readFileSync(lock, 'utf8')).toMatch(/ B /);
+    expect(readdirSync(gitDir)).toEqual(['hub.lock']); // nothing left aside
+    releaseB();
+    expect(existsSync(lock)).toBe(false);
+    const releaseA = acquireLock(gitDir, { what: 'A' });
+    expect(readFileSync(lock, 'utf8')).toMatch(/ A /);
+    releaseA();
+  });
+
+  it('landed: a CLOSED PR that never touched public/<slug>/ counts as landed when its tree equals main', async () => {
+    const { makeLanded } = await import('../lib/hub/flows.mjs');
+    const git = (prTree, mainTree, history) => ({ fetchPr: () => 'head', treeAt: (c) => (c === 'head' ? prTree : mainTree), pathHistory: () => history });
+    const pr = { number: 7, state: 'CLOSED', createdAt: new Date().toISOString() };
+    expect(makeLanded(SLUG, { git: git(null, null, []) })(pr)).toBe(true); // exhibits.yaml-only PR, no bundle anywhere
+    expect(makeLanded(SLUG, { git: git('t1', 't1', []) })(pr)).toBe(true);
+    expect(makeLanded(SLUG, { git: git('t1', 't2', ['t2', 't1']) })(pr)).toBe(true); // landed, then changed
+    expect(makeLanded(SLUG, { git: git('t1', 't2', ['t2']) })(pr)).toBe(false);
+  });
+
+  it("an AF2 re-issue refuses when the old unpublish branch is no longer at the closed PR's head", async () => {
+    const fx = fixture();
+    const { studio, prs } = await landedLaunch(fx);
+    const [l1] = rows(fx);
+    expect((await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    prs.close(2);
+    // Someone moved the branch after the PR closed.
+    sh(fx.remote, 'update-ref', `refs/heads/unpublish/${SLUG}-${l1.id}`, sh(fx.remote, 'rev-parse', 'main'));
+    const moved = sh(fx.remote, 'rev-parse', `refs/heads/unpublish/${SLUG}-${l1.id}`);
+    const r = await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(5);
+    expect(r.logs.join('\n')).toMatch(/refusing to overwrite it/);
+    expect(sh(fx.remote, 'rev-parse', `refs/heads/unpublish/${SLUG}-${l1.id}`)).toBe(moved);
+    expect(prs.prs).toHaveLength(2);
+    expect(r.findings.find((f) => f.kind === 'caveat').title).toMatch(/bundle and exhibit NOT removed/);
+  });
+});
+
 describe('AJ1: hub unpublish with a dead web credential', () => {
   it('exits non-zero, still opens the removal PR, and posts the loud finding naming the DELETE owed', async () => {
     const fx = fixture();
