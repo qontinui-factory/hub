@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { main } from '../bin/hub.mjs';
 import { TENANT_ID } from '../lib/auth/config.mjs';
 import { AuthError } from '../lib/auth/token.mjs';
@@ -29,6 +29,17 @@ for (const [k, v] of Object.entries({
   GIT_COMMITTER_EMAIL: 'hub@example.test',
 })) process.env[k] = v;
 
+// Every temp directory a test makes is removed after it.
+const made = [];
+const tmp = (prefix) => {
+  const d = mkdtempSync(join(tmpdir(), prefix));
+  made.push(d);
+  return d;
+};
+afterEach(() => {
+  while (made.length) rmSync(made.pop(), { recursive: true, force: true });
+});
+
 const sh = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const sha256 = (s) => createHash('sha256').update(s).digest('hex');
 
@@ -46,7 +57,7 @@ const EXHIBITS = '# exhibits\nexhibits:\n  - slug: example-widget\n    fixture: 
  * root with an empty launches table.
  */
 function fixture({ mainBundle = null, exhibits = EXHIBITS } = {}) {
-  const ws = mkdtempSync(join(tmpdir(), 'hub-ws-'));
+  const ws = tmp('hub-ws-');
   const remote = join(ws, 'remote.git');
   sh(ws, 'init', '--quiet', '--bare', '--initial-branch=main', remote);
   const seed = join(ws, 'seed');
@@ -127,7 +138,7 @@ function stubStudio(fx) {
       const r = get(id);
       if (!r) return { code: 1, stdout: `${JSON.stringify({ code: 'not_found', launch_id: id, readopted: false })}\n` };
       if (r.status !== 'unpublished') return refuse('not_unpublished');
-      const atDir = fx.db.prepare('SELECT * FROM launches WHERE publish_dir = ? ORDER BY created_at DESC').all(fx.dir);
+      const atDir = fx.db.prepare('SELECT * FROM launches WHERE publish_dir = ? AND published_at IS NOT NULL ORDER BY published_at DESC').all(fx.dir);
       if (atDir.some((x) => x.status === 'published')) return refuse('launch_live');
       if (!r.superseded_by && atDir[0]?.id !== id) return refuse('not_newest');
       const want = JSON.parse(r.published_files);
@@ -151,11 +162,11 @@ function stubPrs(fx) {
       prs
         .map((p) => ({ ...p, parsed: parseBranch(slug, p.headRefName) }))
         .filter((p) => p.parsed)
-        .sort((a, b) => b.number - a.number),
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : b.number - a.number)),
     async open({ head, oid, title, body }) {
       n += 1;
       sh(fx.remote, 'update-ref', `refs/pull/${n}/head`, oid);
-      const row = { number: n, headRefName: head, headRefOid: oid, state: 'OPEN', createdAt: `2026-10-21T10:00:${String(n).padStart(2, '0')}Z`, url: `https://github.com/qontinui-factory/hub/pull/${n}`, title, body };
+      const row = { number: n, headRefName: head, headRefOid: oid, state: 'OPEN', createdAt: new Date().toISOString(), url: `https://github.com/qontinui-factory/hub/pull/${n}`, title, body };
       prs.push(row);
       return { number: n, url: row.url, via: 'stub' };
     },
@@ -204,7 +215,7 @@ function stubWeb({ unpublish = 200, route = 200, publication = null, onPublish }
 }
 
 /** Run `hub <argv>` with every door stubbed except git and the DB. */
-async function hub(fx, argv, { studio, prs, web, authCheck = async () => {}, env = {}, fetchImpl } = {}) {
+async function hub(fx, argv, { studio, prs, web, authCheck = async () => {}, env = {}, fetchImpl, ...extra } = {}) {
   const logs = [];
   const findings = [];
   const preview = { started: 0, stopped: 0 };
@@ -225,6 +236,7 @@ async function hub(fx, argv, { studio, prs, web, authCheck = async () => {}, env
     },
     authCheck: env.STUDIO_WEB_REFRESH_TOKEN_FILE ? undefined : authCheck,
     startRefresher: () => () => {},
+    probePort: extra.probePort ?? (async () => true),
     startPreview: async () => {
       preview.started += 1;
       return { stop: async () => void (preview.stopped += 1) };
@@ -420,9 +432,9 @@ describe('the AH2 hub tests', () => {
     // B8 unpublished, and main's bytes are neither's.
     const fx = fixture({ mainBundle: { 'index.html': '<html>foreign</html>\n' } });
     const studio = stubStudio(fx);
-    const ins = fx.db.prepare("INSERT INTO launches (id, product_slug, product_path, bundle_dir, status, created_at, publish_dir, published_files, superseded_by) VALUES (?, ?, 'p', 'b', 'unpublished', ?, ?, ?, ?)");
-    ins.run(`${SLUG}-20261020T090000`, SLUG, '2026-10-20T09:00:00Z', fx.dir, JSON.stringify({ 'index.html': sha256('l1') }), `${SLUG}-20261020T100000`);
-    ins.run(`${SLUG}-20261020T100000`, SLUG, '2026-10-20T10:00:00Z', fx.dir, JSON.stringify({ 'index.html': sha256('l2') }), null);
+    const ins = fx.db.prepare("INSERT INTO launches (id, product_slug, product_path, bundle_dir, status, created_at, publish_dir, published_files, superseded_by, published_at) VALUES (?, ?, 'p', 'b', 'unpublished', ?, ?, ?, ?, ?)");
+    ins.run(`${SLUG}-20261020T090000`, SLUG, '2026-10-20T09:00:00Z', fx.dir, JSON.stringify({ 'index.html': sha256('l1') }), `${SLUG}-20261020T100000`, '2026-10-20T09:00:01Z');
+    ins.run(`${SLUG}-20261020T100000`, SLUG, '2026-10-20T10:00:00Z', fx.dir, JSON.stringify({ 'index.html': sha256('l2') }), null, '2026-10-20T10:00:01Z');
     const prs = stubPrs(fx);
     const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
     expect(r.code).toBe(5);
@@ -492,7 +504,7 @@ describe('review regressions', () => {
   it('a readopt exit that is not a documented refusal (e.g. no such command) opens NO removal PR', async () => {
     const fx = fixture({ mainBundle: { 'index.html': '<html>live</html>\n' } });
     fx.db
-      .prepare("INSERT INTO launches (id, product_slug, product_path, bundle_dir, status, created_at, publish_dir, published_files) VALUES (?, ?, 'p', 'b', 'unpublished', '2026-10-20T09:00:00Z', ?, '{}')")
+      .prepare("INSERT INTO launches (id, product_slug, product_path, bundle_dir, status, created_at, publish_dir, published_files, published_at) VALUES (?, ?, 'p', 'b', 'unpublished', '2026-10-20T09:00:00Z', ?, '{}', '2026-10-20T09:00:01Z')")
       .run(`${SLUG}-20261020T090000`, SLUG, fx.dir);
     const studio = stubStudio(fx);
     studio.readopt = async () => ({ code: 2, stdout: '', error: "No such command 'readopt'" });
@@ -555,8 +567,8 @@ describe('review regressions', () => {
 
   it('the preview server keeps a directory redirect inside its mount', async () => {
     const { startBridgeServer } = await import('../lib/hub/bridge-server.mjs');
-    const site = mkdtempSync(join(tmpdir(), 'hub-site-'));
-    const mount = mkdtempSync(join(tmpdir(), 'hub-mount-'));
+    const site = tmp('hub-site-');
+    const mount = tmp('hub-mount-');
     mkdirSync(join(mount, 'docs'));
     writeFileSync(join(mount, 'docs', 'index.html'), 'docs');
     writeFileSync(join(site, 'index.html'), 'home');
@@ -568,6 +580,208 @@ describe('review regressions', () => {
       expect(await (await fetch(`${srv.base}/s/docs/`)).text()).toBe('docs');
       // An encoded separator cannot climb out of the mount.
       expect((await fetch(`${srv.base}/s/..%2f..%2findex.html`)).status).toBe(404);
+    } finally {
+      await srv.close();
+    }
+  });
+});
+
+describe('second review fixes', () => {
+  it('HIGH: bytes on main with NO launch in the studio DB refuse (exit 5) and remove nothing', async () => {
+    const fx = fixture({ mainBundle: { 'index.html': '<html>live</html>\n' } });
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    const main0 = sh(fx.remote, 'rev-parse', 'main');
+    for (const argv of [['publish', SLUG], ['unpublish', SLUG]]) {
+      const r = await hub(fx, argv, { studio, prs, web: stubWeb() });
+      expect(r.code).toBe(5);
+      expect(r.logs.join('\n')).toMatch(/gives no launch to re-adopt; nothing was removed.*studio\.db/s);
+    }
+    expect(prs.prs).toEqual([]);
+    expect(studio.calls).toEqual([]);
+    expect(rows(fx)).toEqual([]);
+    expect(sh(fx.remote, 'rev-parse', 'main')).toBe(main0);
+    expect(readFileSync(join(fx.dir, 'index.html'), 'utf8')).toBe('<html>live</html>\n');
+  });
+
+  it('AD3 success: L1 landed, L2 closed unlanded -> L2 unpublished, L1 re-adopted, then L3 published over it', async () => {
+    const fx = fixture();
+    const { studio, prs } = await landedLaunch(fx);
+    expect((await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    prs.close(2);
+    const [l1, l2] = rows(fx);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(0);
+    expect(studio.calls.slice(2).map((c) => c[0] === 'run' ? 'run' : c.join(' '))).toEqual([`unpublish ${l2.id}`, `readopt ${l1.id}`, 'run']);
+    const after = rows(fx);
+    const l3 = after[2];
+    expect(after.map((x) => [x.id, x.status, x.superseded_by])).toEqual([
+      [l1.id, 'unpublished', l3.id],
+      [l2.id, 'unpublished', null],
+      [l3.id, 'published', null],
+    ]);
+    expect(sh(fx.clone, 'rev-parse', '--abbrev-ref', 'HEAD')).toBe(`publish/${SLUG}-${l3.id}`);
+    expect(readFileSync(join(fx.dir, 'index.html'), 'utf8')).toContain(l3.id);
+    expect(sh(fx.clone, 'show', `HEAD:public/${SLUG}/index.html`)).toContain(l3.id);
+    expect(prs.prs.at(-1)).toMatchObject({ number: 3, state: 'OPEN' });
+  });
+
+  it('a live hub lock refuses; a stale one (dead pid) is replaced', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    const lock = join(fx.clone, '.git', 'hub.lock');
+    const { hostname } = await import('node:os');
+    writeFileSync(lock, `${process.pid} ${hostname()} publish other\n`);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(5);
+    expect(r.logs.join('\n')).toMatch(/another hub command holds/);
+    expect(studio.calls).toEqual([]);
+    expect(rows(fx)).toEqual([]);
+    writeFileSync(lock, `999999999 ${hostname()} publish dead\n`);
+    const ok = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(ok.code).toBe(0);
+    expect(existsSync(lock)).toBe(false);
+    expect(rows(fx).map((x) => x.status)).toEqual(['published']);
+  });
+
+  it('a CLOSED PR whose tree landed earlier stays landed after main later changes the directory', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    expect((await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    prs.landRewritten(1);
+    // A later commit on main edits the bundle (so main's tree no longer equals PR #1's).
+    const seed = join(fx.ws, 'seed');
+    sh(seed, 'pull', '--quiet', '--ff-only', 'origin', 'main');
+    writeFileSync(join(seed, 'public', SLUG, 'extra.txt'), 'later\n');
+    sh(seed, 'add', '-A');
+    sh(seed, 'commit', '--quiet', '--no-verify', '-m', 'later');
+    sh(seed, 'push', '--quiet', 'origin', 'HEAD:main');
+    const [l1] = rows(fx);
+    const r = await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(0);
+    expect(r.logs.join('\n')).not.toMatch(/B8/);
+    expect(studio.calls.map((c) => c.join(' ')).slice(1)).toEqual([`unpublish ${l1.id}`]);
+    expect(rows(fx)[0].status).toBe('unpublished');
+  });
+
+  it('a failure after the record DELETE posts the loud finding and exits non-zero; the row and main are unchanged', async () => {
+    const fx = fixture();
+    const { studio, prs } = await landedLaunch(fx);
+    studio.unpublish = async () => ({ code: 1, stdout: '' });
+    const web = stubWeb();
+    const r = await hub(fx, ['unpublish', SLUG], { studio, prs, web });
+    expect(r.code).toBe(6);
+    expect(web.calls.filter((c) => c[0] === 'unpublish')).toHaveLength(1);
+    const loud = r.findings.find((f) => f.kind === 'caveat');
+    expect(loud.title).toBe(`hub unpublish ${SLUG}: record retracted; bundle and exhibit NOT removed — re-run hub unpublish ${SLUG}`);
+    expect(rows(fx)[0].status).toBe('published');
+    expect(prs.prs).toHaveLength(1);
+    expect(mainHas(fx, `public/${SLUG}/index.html`)).toBe(true);
+  });
+
+  it('--reactivate then a failed studio run posts "public again with NO bundle"', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    studio.launchRun = async () => ({ code: 2, stdout: '' });
+    const web = stubWeb({ route: 404, publication: { owned_by_caller_tenant: true, unpublished: true } });
+    const r = await hub(fx, ['publish', SLUG, '--reactivate'], { studio, prs: stubPrs(fx), web });
+    expect(r.code).toBe(6);
+    expect(web.calls.find((c) => c[0] === 'publish')).toEqual(['publish', SLUG, true]);
+    expect(r.findings.find((f) => f.kind === 'caveat').title).toMatch(/record is public again with NO bundle/);
+    expect(rows(fx)).toEqual([]);
+    expect(sh(fx.clone, 'rev-parse', '--abbrev-ref', 'HEAD')).toBe('main');
+  });
+
+  it('AF2 inside publish: a DELETE answering 500 stops before any PR', async () => {
+    const fx = fixture();
+    const { studio, prs } = await landedLaunch(fx);
+    expect((await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    prs.close(2);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb({ unpublish: 500 }) });
+    expect(r.code).toBe(4);
+    expect(r.logs.join('\n')).toMatch(/AF2 re-issue stopped at act 1/);
+    expect(prs.prs).toHaveLength(2);
+    // readopt made it live again for the bytes on main; nothing else moved.
+    expect(rows(fx)[0].status).toBe('published');
+    expect(sh(fx.clone, 'rev-parse', '--abbrev-ref', 'HEAD')).toBe('main');
+  });
+
+  it('a 401 from /publication is a web auth failure (exit 3), not "publish first"', async () => {
+    const fx = fixture();
+    const web = stubWeb({ route: 404 });
+    web.publication = async () => ({ status: 401, body: null, code: null });
+    const studio = stubStudio(fx);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs: stubPrs(fx), web });
+    expect(r.code).toBe(3);
+    expect(r.logs.join('\n')).not.toMatch(/record-publish/);
+    expect(r.findings[0].kind).toBe('caveat');
+    expect(studio.calls).toEqual([]);
+    expect(rows(fx)).toEqual([]);
+  });
+
+  it('the preview port in use refuses before recovery or reset', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    await studio.launchRun(join(fx.clone, 'probe', `${SLUG}.yaml`)); // a C3 state that recovery would act on
+    const r = await hub(fx, ['publish', SLUG], { studio, prs: stubPrs(fx), web: stubWeb(), probePort: async () => false });
+    expect(r.code).toBe(5);
+    expect(r.logs.join('\n')).toMatch(/4330 is already in use/);
+    expect(studio.calls.map((c) => c[0])).toEqual(['run']);
+    expect(rows(fx).map((x) => x.status)).toEqual(['published']);
+    expect(bundleFiles(fx)).toEqual(['index.html', 'launch-manifest.json']);
+  });
+
+  it('probePort reports a bound port as busy', async () => {
+    const { probePort } = await import('../lib/hub/preview.mjs');
+    const { createServer } = await import('node:net');
+    const srv = createServer();
+    await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+    expect(await probePort(srv.address().port)).toBe(false);
+    await new Promise((r) => srv.close(r));
+  });
+
+  it('bootScriptCheck with no local dist/ is UNKNOWN, never ok', async () => {
+    const { bootScriptCheck } = await import('../lib/hub/verify.mjs');
+    const r = await bootScriptCheck('https://x.test', tmp('hub-dist-'), async () => ({ status: 200, ok: true, arrayBuffer: async () => new ArrayBuffer(1) }));
+    expect(r).toMatchObject({ verdict: 'unknown', ok: false });
+  });
+
+  it('the relays bind 127.0.0.1 and refuse a foreign Host or Origin', async () => {
+    const { startBridgeServer } = await import('../lib/hub/bridge-server.mjs');
+    const { request } = await import('node:http');
+    const site = tmp('hub-site-');
+    writeFileSync(join(site, 'index.html'), 'home');
+    const srv = await startBridgeServer({ port: 0, siteRoot: site, corsOrigin: 'https://build.qontinui.io' });
+    const get = (headers) =>
+      new Promise((resolve, reject) => {
+        const req = request({ host: '127.0.0.1', port: srv.port, path: '/', headers }, (res) => {
+          res.resume();
+          resolve({ status: res.statusCode, acao: res.headers['access-control-allow-origin'], creds: res.headers['access-control-allow-credentials'] });
+        });
+        req.on('error', reject);
+        req.end();
+      });
+    try {
+      expect(srv.base.startsWith('http://127.0.0.1:')).toBe(true);
+      expect((await get({})).status).toBe(200);
+      expect((await get({ Host: `evil.test:${srv.port}` })).status).toBe(403);
+      expect((await get({ Host: `localhost:${srv.port}` })).status).toBe(403);
+      expect((await get({ Origin: 'https://evil.test' })).status).toBe(403);
+      expect((await get({ Origin: srv.base })).status).toBe(200);
+      const cors = await get({ Origin: 'https://build.qontinui.io' });
+      expect(cors).toMatchObject({ status: 200 });
+      const pre = await new Promise((resolve) => {
+        const req = request({ host: '127.0.0.1', port: srv.port, method: 'OPTIONS', path: '/api/ui-bridge/tabs', headers: { Origin: 'https://build.qontinui.io' } }, (res) => {
+          res.resume();
+          resolve(res.headers);
+        });
+        req.end();
+      });
+      expect(pre['access-control-allow-origin']).toBe('https://build.qontinui.io');
+      expect(pre['access-control-allow-private-network']).toBe('true');
+      expect(pre['access-control-allow-credentials']).toBeUndefined();
     } finally {
       await srv.close();
     }

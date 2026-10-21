@@ -45,7 +45,7 @@ import { refreshValiditySecs } from '../lib/auth/validity.mjs';
 import { EXIT as FLOW_EXIT, publish, recordPublish, studioChildEnv, unpublish } from '../lib/hub/flows.mjs';
 import { makeGit } from '../lib/hub/git.mjs';
 import { checkSlug } from '../lib/hub/product.mjs';
-import { startPreview } from '../lib/hub/preview.mjs';
+import { probePort, startPreview } from '../lib/hub/preview.mjs';
 import { makePrs } from '../lib/hub/prs.mjs';
 import { HubError, hubRoots } from '../lib/hub/roots.mjs';
 import { makeStudio } from '../lib/hub/studio.mjs';
@@ -165,6 +165,8 @@ export function hubDeps(deps, need) {
       }),
     startRefresher: deps.startRefresher ?? ((onError) => startRefresher({ env, fetchImpl, onError })),
     startPreview: deps.startPreview ?? ((slug) => startPreview({ roots, slug, log })),
+    probePort: deps.probePort ?? probePort,
+    acquireLock: deps.acquireLock,
   };
 }
 
