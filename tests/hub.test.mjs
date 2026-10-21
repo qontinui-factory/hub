@@ -13,6 +13,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { main } from '../bin/hub.mjs';
 import { TENANT_ID } from '../lib/auth/config.mjs';
 import { AuthError } from '../lib/auth/token.mjs';
+import { HubError } from '../lib/hub/roots.mjs';
 import { addExhibit, removeExhibit } from '../lib/hub/exhibits.mjs';
 import { studioChildEnv } from '../lib/hub/flows.mjs';
 import { makeGit } from '../lib/hub/git.mjs';
@@ -241,7 +242,7 @@ async function hub(fx, argv, { studio, prs, web, authCheck = async () => {}, env
       preview.started += 1;
       return { stop: async () => void (preview.stopped += 1) };
     },
-    now: () => new Date(Date.UTC(2026, 9, 21, 11, 0, 0)),
+    now: extra.now ?? (() => new Date(Date.UTC(2026, 9, 21, 11, 0, 0))),
   });
   return { code, logs, findings, preview };
 }
@@ -415,7 +416,7 @@ describe('the AH2 hub tests', () => {
     expect(prs.prs.map((p) => [p.number, p.state, p.headRefName])).toEqual([
       [1, 'MERGED', `publish/${SLUG}-${l1.id}`],
       [2, 'CLOSED', `unpublish/${SLUG}-${l1.id}`],
-      [3, 'OPEN', `unpublish/${SLUG}-${l1.id}`],
+      [3, 'OPEN', `unpublish/${SLUG}-${l1.id}-r20261021T110000Z`],
     ]);
     expect(mainHas(fx, `public/${SLUG}/index.html`)).toBe(true); // still live until #3 lands
     expect(sh(fx.clone, 'ls-tree', '-r', '--name-only', 'HEAD', `public/${SLUG}`)).toBe('');
@@ -822,21 +823,41 @@ describe('third review fixes', () => {
     expect(makeLanded(SLUG, { git: git('t1', 't2', ['t2']) })(pr)).toBe(false);
   });
 
-  it("an AF2 re-issue refuses when the old unpublish branch is no longer at the closed PR's head", async () => {
+  it('a re-issue that pushed but failed to open its PR re-runs on a fresh branch', async () => {
     const fx = fixture();
     const { studio, prs } = await landedLaunch(fx);
     const [l1] = rows(fx);
     expect((await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
-    prs.close(2);
-    // Someone moved the branch after the PR closed.
-    sh(fx.remote, 'update-ref', `refs/heads/unpublish/${SLUG}-${l1.id}`, sh(fx.remote, 'rev-parse', 'main'));
-    const moved = sh(fx.remote, 'rev-parse', `refs/heads/unpublish/${SLUG}-${l1.id}`);
-    const r = await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb() });
-    expect(r.code).toBe(5);
-    expect(r.logs.join('\n')).toMatch(/refusing to overwrite it/);
-    expect(sh(fx.remote, 'rev-parse', `refs/heads/unpublish/${SLUG}-${l1.id}`)).toBe(moved);
-    expect(prs.prs).toHaveLength(2);
-    expect(r.findings.find((f) => f.kind === 'caveat').title).toMatch(/bundle and exhibit NOT removed/);
+    prs.close(2); // AF2: the retraction never landed
+    // The re-issue pushes its branch, then the PR transport fails.
+    const open = prs.open;
+    prs.open = async () => {
+      throw new HubError('failed', 'no PR for the branch after a re-read (B5)');
+    };
+    const failed = await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb(), now: () => new Date(Date.UTC(2026, 9, 21, 11, 0, 0)) });
+    expect(failed.code).toBe(1);
+    const first = `unpublish/${SLUG}-${l1.id}-r20261021T110000Z`;
+    expect(sh(fx.remote, 'rev-parse', '--verify', `refs/heads/${first}`)).toMatch(/^[0-9a-f]{40}$/);
+    expect(failed.findings.find((f) => f.kind === 'caveat').title).toMatch(/bundle and exhibit NOT removed/);
+    expect(rows(fx)[0].status).toBe('unpublished');
+    // Re-run: the clone resets, L1 is re-adopted from main's bytes, and a NEW branch carries the retraction.
+    prs.open = open;
+    const again = await hub(fx, ['unpublish', SLUG], { studio, prs, web: stubWeb(), now: () => new Date(Date.UTC(2026, 9, 21, 11, 5, 0)) });
+    expect(again.code).toBe(0);
+    expect(prs.prs.at(-1)).toMatchObject({ number: 3, state: 'OPEN', headRefName: `unpublish/${SLUG}-${l1.id}-r20261021T110500Z` });
+    expect(parseBranch(SLUG, prs.prs.at(-1).headRefName)).toEqual({ act: 'unpublish', launchId: l1.id });
+    expect(rows(fx)[0].status).toBe('unpublished');
+    expect(sh(fx.clone, 'ls-tree', '-r', '--name-only', 'HEAD', `public/${SLUG}`)).toBe('');
+    expect(mainHas(fx, `public/${SLUG}/index.html`)).toBe(true); // live until the PR lands
+  });
+
+  it('git.push refuses to overwrite a branch that exists where it was not expected', async () => {
+    const fx = fixture();
+    const git = makeGit(fx.clone);
+    const main = sh(fx.remote, 'rev-parse', 'main');
+    sh(fx.remote, 'update-ref', 'refs/heads/taken', main);
+    expect(() => git.push('taken', main)).toThrow(/refusing to overwrite/);
+    expect(() => git.push('taken', main, 'f'.repeat(40))).toThrow(/refusing to overwrite/);
   });
 });
 
@@ -931,6 +952,8 @@ describe('pieces', () => {
     expect(parseBranch('a', 'publish/a-b-a-b-20261021T100000')).toBeNull();
     expect(parseBranch('a-b', 'publish/a-b-a-b-20261021T100000')).toEqual({ act: 'publish', launchId: 'a-b-20261021T100000' });
     expect(parseBranch('a', 'remove/a-20261021T110000Z')).toEqual({ act: 'remove', launchId: null });
+    expect(parseBranch('a', 'unpublish/a-a-20261021T100000-2-r20261021T110000Z')).toEqual({ act: 'unpublish', launchId: 'a-20261021T100000-2' });
+    expect(parseBranch('a', 'publish/a-a-20261021T100000-r20261021T110000Z')).toBeNull();
   });
   it('exhibits.yaml: add appends once, remove drops the entry and its fields, comments survive', () => {
     const added = addExhibit(EXHIBITS, 'x');

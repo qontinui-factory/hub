@@ -1,9 +1,9 @@
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { main, readStdinSecret } from '../bin/hub.mjs';
 import { COGNITO_CLIENT_ID, SESSION_REFRESH_TOKEN_KEY, TENANT_ID } from '../lib/auth/config.mjs';
 import { refreshTokenFromStorageState } from '../lib/auth/storage-state.mjs';
@@ -16,8 +16,15 @@ const AUTH_TIME = Math.floor(Date.now() / 1000) - 10 * 86400; // signed in ten d
 const ID = jwt({ exp: Math.floor(Date.now() / 1000) + 3600, auth_time: AUTH_TIME, email: 'op@example.test' });
 const ACCESS = jwt({ exp: Math.floor(Date.now() / 1000) + 3600, token_use: 'access' });
 
+// Every temp directory a test makes is removed after it.
+const made = [];
+afterEach(() => {
+  while (made.length) rmSync(made.pop(), { recursive: true, force: true });
+});
+
 function env() {
   const dir = mkdtempSync(join(tmpdir(), 'hub-auth-'));
+  made.push(dir);
   return {
     dir,
     STUDIO_WEB_REFRESH_TOKEN_FILE: join(dir, 'state', 'refresh'),
