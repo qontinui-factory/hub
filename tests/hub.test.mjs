@@ -123,15 +123,17 @@ function stubStudio(fx) {
     },
     async readopt(id) {
       calls.push(['readopt', id]);
+      const refuse = (code) => ({ code: 2, stdout: `${JSON.stringify({ code, detail: 'x', launch_id: id, readopted: false })}\n` });
       const r = get(id);
-      if (!r || r.status !== 'unpublished') return { code: 2, stdout: '' };
+      if (!r) return { code: 1, stdout: `${JSON.stringify({ code: 'not_found', launch_id: id, readopted: false })}\n` };
+      if (r.status !== 'unpublished') return refuse('not_unpublished');
       const atDir = fx.db.prepare('SELECT * FROM launches WHERE publish_dir = ? ORDER BY created_at DESC').all(fx.dir);
-      if (atDir.some((x) => x.status === 'published')) return { code: 2, stdout: '' };
-      if (!r.superseded_by && atDir[0]?.id !== id) return { code: 2, stdout: '' };
+      if (atDir.some((x) => x.status === 'published')) return refuse('launch_live');
+      if (!r.superseded_by && atDir[0]?.id !== id) return refuse('not_newest');
       const want = JSON.parse(r.published_files);
       const have = bundleFiles(fx);
       const same = have.length === Object.keys(want).length && have.every((f) => want[f] === sha256(readFileSync(join(fx.dir, f))));
-      if (!same) return { code: 2, stdout: `${JSON.stringify({ code: 'bytes_differ', detail: 'x', launch_id: id, readopted: false })}\n` };
+      if (!same) return refuse('bytes_differ');
       fx.db.prepare("UPDATE launches SET status = 'published', superseded_by = NULL, unpublished_at = NULL WHERE id = ?").run(id);
       return { code: 0, stdout: '' };
     },
@@ -159,6 +161,14 @@ function stubPrs(fx) {
     },
     close: (number) => {
       prs.find((p) => p.number === number).state = 'CLOSED';
+    },
+    /** coord lands it with a REBASE: a new commit on main with the PR's tree; GitHub says CLOSED. */
+    landRewritten: (number) => {
+      const p = prs.find((x) => x.number === number);
+      const tree = sh(fx.remote, 'rev-parse', `${p.headRefOid}^{tree}`);
+      const commit = sh(fx.remote, 'commit-tree', tree, '-p', 'main', '-m', 'rebased land');
+      sh(fx.remote, 'update-ref', 'refs/heads/main', commit);
+      p.state = 'CLOSED';
     },
     /** coord lands it: the head becomes main (a no-op rebase, so GitHub says MERGED). */
     land: (number) => {
@@ -423,7 +433,7 @@ describe('the AH2 hub tests', () => {
     expect(sh(fx.clone, 'show', '--name-status', '--format=', 'HEAD')).toBe(`D\tpublic/${SLUG}/index.html`);
     expect(existsSync(fx.dir)).toBe(false);
     expect(r.findings.find((f) => f.kind === 'status').title).toMatch(/removal PR #1/);
-    expect(r.logs.join('\n')).toMatch(/refused launch .* bytes_differ/);
+    expect(r.logs.join('\n')).toMatch(/refused launch .*\(bytes_differ/);
   });
 
   it.each([
@@ -475,6 +485,92 @@ describe('the AH2 hub tests', () => {
     expect(rows(fx).map((x) => x.status)).toEqual(['published']);
     expect(readFileSync(join(fx.clone, 'exhibits.yaml'), 'utf8')).toContain(`  - slug: ${SLUG}`);
     expect(prs.prs).toHaveLength(1);
+  });
+});
+
+describe('review regressions', () => {
+  it('a readopt exit that is not a documented refusal (e.g. no such command) opens NO removal PR', async () => {
+    const fx = fixture({ mainBundle: { 'index.html': '<html>live</html>\n' } });
+    fx.db
+      .prepare("INSERT INTO launches (id, product_slug, product_path, bundle_dir, status, created_at, publish_dir, published_files) VALUES (?, ?, 'p', 'b', 'unpublished', '2026-10-20T09:00:00Z', ?, '{}')")
+      .run(`${SLUG}-20261020T090000`, SLUG, fx.dir);
+    const studio = stubStudio(fx);
+    studio.readopt = async () => ({ code: 2, stdout: '', error: "No such command 'readopt'" });
+    const prs = stubPrs(fx);
+    const main0 = sh(fx.remote, 'rev-parse', 'main');
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(6);
+    expect(r.logs.join('\n')).toMatch(/without a documented refusal/);
+    expect(prs.prs).toEqual([]);
+    expect(sh(fx.remote, 'rev-parse', 'main')).toBe(main0);
+    expect(readFileSync(join(fx.dir, 'index.html'), 'utf8')).toBe('<html>live</html>\n');
+  });
+
+  it('a coord land that rebased the PR (CLOSED, rewritten sha, same tree) counts as landed: no B8 unpublish', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    expect((await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    prs.landRewritten(1);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(0);
+    expect(r.logs.join('\n')).not.toMatch(/B8/);
+    expect(studio.calls.map((c) => c[0])).toEqual(['run', 'run']);
+    const after = rows(fx);
+    expect(after.map((x) => [x.status, x.superseded_by])).toEqual([
+      ['unpublished', after[1].id],
+      ['published', null],
+    ]);
+  });
+
+  it('untracked leftovers under public/<slug>/ after the reset are refused, never committed or cleaned', async () => {
+    const fx = fixture();
+    mkdirSync(fx.dir, { recursive: true });
+    writeFileSync(join(fx.dir, 'stray.html'), 'x');
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    const r = await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() });
+    expect(r.code).toBe(5);
+    expect(r.logs.join('\n')).toMatch(/untracked file\(s\) remain under public\/hub-retraction-probe\/ that no launch removed: public\/hub-retraction-probe\/stray.html/);
+    expect(studio.calls).toEqual([]);
+    expect(existsSync(join(fx.dir, 'stray.html'))).toBe(true);
+  });
+
+  it('--reactivate writes nothing to the web while a hub PR is open', async () => {
+    const fx = fixture();
+    const studio = stubStudio(fx);
+    const prs = stubPrs(fx);
+    expect((await hub(fx, ['publish', SLUG], { studio, prs, web: stubWeb() })).code).toBe(0);
+    const web = stubWeb({ route: 404, publication: { owned_by_caller_tenant: true, unpublished: true } });
+    const r = await hub(fx, ['publish', SLUG, '--reactivate'], { studio, prs, web });
+    expect(r.code).toBe(5);
+    expect(web.calls.filter((c) => c[0] === 'put' || c[0] === 'publish')).toEqual([]);
+  });
+
+  it('exhibits.yaml: an entry with nested lists and blank lines is removed whole', () => {
+    const text = 'exhibits:\n  - slug: foo\n    tags:\n      - a\n\n    fixture: f.json\n  - slug: bar\n';
+    expect(removeExhibit(text, 'foo')).toBe('exhibits:\n  - slug: bar\n');
+    expect(() => addExhibit('exhibits: [{slug: a}]\n', 'b')).toThrow(/flow list/);
+  });
+
+  it('the preview server keeps a directory redirect inside its mount', async () => {
+    const { startBridgeServer } = await import('../lib/hub/bridge-server.mjs');
+    const site = mkdtempSync(join(tmpdir(), 'hub-site-'));
+    const mount = mkdtempSync(join(tmpdir(), 'hub-mount-'));
+    mkdirSync(join(mount, 'docs'));
+    writeFileSync(join(mount, 'docs', 'index.html'), 'docs');
+    writeFileSync(join(site, 'index.html'), 'home');
+    const srv = await startBridgeServer({ port: 0, siteRoot: site, mounts: { '/s/': mount } });
+    try {
+      const res = await fetch(`${srv.base}/s/docs?x=1`, { redirect: 'manual' });
+      expect(res.status).toBe(301);
+      expect(res.headers.get('location')).toBe('/s/docs/?x=1');
+      expect(await (await fetch(`${srv.base}/s/docs/`)).text()).toBe('docs');
+      // An encoded separator cannot climb out of the mount.
+      expect((await fetch(`${srv.base}/s/..%2f..%2findex.html`)).status).toBe(404);
+    } finally {
+      await srv.close();
+    }
   });
 });
 
