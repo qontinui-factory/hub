@@ -59,3 +59,33 @@ node bin/hub.mjs auth refresh                      # exchange once, rewrite the 
   was refused (sign in again); 4 transient (retry); 6 stored and checked, but
   the reminder was not registered; 7 stored, but the storage-state file could
   not be deleted (delete it by hand); 8 both 6 and 7.
+
+## Publishing to the hub (`hub publish` / `hub unpublish`)
+
+These run on the one studio host (plan AO1), with `QONTINUI_WORKSPACE_ROOT`
+set. The three roots are derived from it, and a disagreeing export is refused:
+`STUDIO_HUB_CLONE` (`.studio/hub-publish`), `STUDIO_HUB_PREVIEW`
+(`.studio/hub-preview`) and `STUDIO_ROOT` (`.studio/studio-host`, the studio
+clone and its DB). The studio CLI is `HUB_STUDIO_CMD` (a JSON argv array), or
+by default `poetry -C $STUDIO_ROOT run studio --root $STUDIO_ROOT`.
+
+| Command | What it does |
+|---|---|
+| `hub record-publish <slug> [--reactivate]` | Sets the product `is_public` and publishes its record (this tenant's products only). |
+| `hub publish <slug> [--reactivate] [-- <studio flags>]` | Recovers and resets the clone, then starts the preview and runs `studio launch run`. Commits `public/<slug>/` and `exhibits.yaml` and opens a PR. Coord lands it. |
+| `hub unpublish <slug>` | Retracts the record, runs `studio launch unpublish`, and opens a PR that removes the bundle and the exhibit. |
+| `hub preview <slug> [--no-build]` | Serves `dist/` on `127.0.0.1:4330`, with `${STUDIO_HUB_PREVIEW}/<slug>` at `/<slug>/` and the relay at `/api/ui-bridge`. Also opens one headless tab. |
+| `hub verify <url> [--plain]` | Reads the page through UI Bridge and prints JSON: the snapshot, page-health and the `/_hub/ui-bridge.js` sha. `--plain` fails if a visitor's page would dial loopback or UI Bridge. |
+
+Exit codes:
+
+| Code | Meaning |
+|---|---|
+| 0 | ok |
+| 2 | usage |
+| 3 | web auth failed: re-run `hub auth import` |
+| 4 | transient: retry |
+| 5 | refused |
+| 6 | the studio refused |
+
+`hub verify` uses its own codes: 6 means no tab registered or a CRITICAL page-health result, 7 a boot-script mismatch, and 8 a `--plain` leak.

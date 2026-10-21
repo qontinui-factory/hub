@@ -20,9 +20,11 @@
     "@qontinui/design-tokens": "1.0.0",
     "@qontinui/studio-scenes": "github:qontinui/qontinui-studio#c6ac95a5ccc62f1a1c48e4266ff8970a67e3c14c&path:/scenes",
     "@qontinui/ui-bridge": "0.33.0",
+    "@qontinui/ui-bridge-headless": "0.6.0",
     "@remotion/player": "4.0.529",
     "astro": "7.3.5",
     "js-yaml": "5.4.2",
+    "playwright": "1.64.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "remotion": "4.0.529"

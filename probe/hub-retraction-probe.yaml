@@ -1,0 +1,30 @@
+# The disposable product the Phase 3 retraction acceptance publishes and then
+# retracts (plan 2026-10-17-build-qontinui-io-factory-hub, AH1), so that
+# qontinui-studio itself is never retracted. Its record covers only
+# qontinui/qontinui-studio, so it holds only this tenant's public data.
+#
+# `hub publish hub-retraction-probe` resolves to this file
+# (${STUDIO_HUB_CLONE}/probe/<slug>.yaml, AI1). The ${NAME} paths are expanded
+# by the studio from the environment `hub` sets (C1, AG2); the four preview
+# fields point at `hub preview` on 127.0.0.1:4330 (D5, AF1).
+slug: hub-retraction-probe
+title: hub-retraction-probe
+tagline: A disposable product the hub publishes and retracts to prove the one-step unpublish.
+description: >-
+  hub-retraction-probe exists only to be published to build.qontinui.io and
+  then retracted with `hub unpublish`, proving that an unpublish removes the
+  exhibit, the launch bundle and the public record together. It stays
+  retracted afterwards.
+repos: [qontinui/qontinui-studio]
+record:
+  door: public
+  public_url: https://build.qontinui.io/hub-retraction-probe/how-it-was-built.html
+publish:
+  publish_dir: ${STUDIO_HUB_CLONE}/public/hub-retraction-probe
+  ui_bridge_url: http://127.0.0.1:4330/api/ui-bridge
+  preview_url: http://127.0.0.1:4330/hub-retraction-probe/
+  preview_dir: ${STUDIO_HUB_PREVIEW}/hub-retraction-probe
+  preview_manifest_url: http://127.0.0.1:4330/hub-retraction-probe/launch-manifest.json
+  page_scripts: ["/_hub/ui-bridge.js"]
+  unpublish_command: hub unpublish hub-retraction-probe
+  commercial: false

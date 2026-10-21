@@ -1,7 +1,24 @@
 #!/usr/bin/env node
 // hub — the build.qontinui.io hub's operator and agent commands.
-// Plan 2026-10-17-build-qontinui-io-factory-hub, Phase 3 (AJ1, AK1-AK4, AL1).
+// Plan 2026-10-17-build-qontinui-io-factory-hub, Phase 3.
 //
+// Publication (lib/hub/*; plan A1-A3, B1-B10, C1, C3, AD1-AD3, AE1-AE5, AF1,
+// AF2, AG1, AG2, AH1, AI1-AI4, AJ1, AK2, AK4):
+//   hub record-publish <slug> [--reactivate]   PUT is_public + POST publish (this tenant's products)
+//   hub publish <slug> [--reactivate] [-- <studio launch run flags>]
+//                                              D7-gated bundle -> PR on qontinui-factory/hub
+//   hub unpublish <slug>                       record DELETE, studio unpublish, removal PR
+//   hub preview <slug> [--no-build]            127.0.0.1:4330 preview + relay + one tab
+//   hub verify <url> [--plain] [--dist <dir>]  UI Bridge read (or a plain request log), as JSON
+// Exit codes (publication): 0 ok; 1 unexpected; 2 usage; 3 web auth failed
+// (re-import; `hub unpublish` still did acts 2 and 3); 4 transient (retry);
+// 5 refused (reserved slug, door, 404 route, retracted, dirty clone, open or
+// newly opened hub PR, another tenant's record); 6 the studio refused or
+// failed. `hub verify`: 0 pass; 6 no registered tab or page-health CRITICAL;
+// 7 the deployed /_hub/ui-bridge.js is missing or differs from dist/;
+// 8 (--plain) the page made a loopback or UI Bridge request.
+//
+// Credential (AJ1, AK1-AK4, AL1):
 //   hub auth import <storage-state.json>   store the refresh token from a
 //                                          `ui-bridge-login-web --storage-state-out` file
 //   hub auth set                           store a refresh token read from stdin
@@ -16,13 +33,24 @@
 // check, so a refused or interrupted import leaves the stored credential as it was.
 // A token is never printed and never accepted on argv.
 import { readFileSync, realpathSync, unlinkSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { dirname, join } from 'node:path';
+import { format } from 'node:util';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bearerFile, refreshTokenFile } from '../lib/auth/config.mjs';
-import { AuthError, exchange, refreshBearer, writeSecret } from '../lib/auth/token.mjs';
+import { AuthError, exchange, refreshBearer, startRefresher, writeSecret } from '../lib/auth/token.mjs';
 import { refreshTokenFromStorageState } from '../lib/auth/storage-state.mjs';
 import { checkAdmin } from '../lib/auth/check.mjs';
 import { makeCaller, postAuthFinding, registerReminder } from '../lib/auth/coord.mjs';
 import { refreshValiditySecs } from '../lib/auth/validity.mjs';
+import { EXIT as FLOW_EXIT, publish, recordPublish, studioChildEnv, unpublish } from '../lib/hub/flows.mjs';
+import { makeGit } from '../lib/hub/git.mjs';
+import { checkSlug } from '../lib/hub/product.mjs';
+import { startPreview } from '../lib/hub/preview.mjs';
+import { makePrs } from '../lib/hub/prs.mjs';
+import { HubError, hubRoots } from '../lib/hub/roots.mjs';
+import { makeStudio } from '../lib/hub/studio.mjs';
+import { verifyPlain, verifyWithBridge } from '../lib/hub/verify.mjs';
+import { makeWeb } from '../lib/hub/web.mjs';
 
 const EXIT = { usage: 2, authoritative: 3, transient: 4 };
 
@@ -104,11 +132,128 @@ export async function storeAndCheck(refreshToken, deps) {
   return 0;
 }
 
+const USAGE = [
+  'usage: hub auth import <storage-state.json> | hub auth set | hub auth check | hub auth refresh',
+  '       hub record-publish <slug> [--reactivate]',
+  '       hub publish <slug> [--reactivate] [-- <studio launch run flags>]',
+  '       hub unpublish <slug>',
+  '       hub preview <slug> [--no-build]',
+  '       hub verify <url> [--plain] [--dist <dir>]',
+].join('\n');
+
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/** The publication commands' dependencies, real by default; tests override any of them. */
+export function hubDeps(deps, need) {
+  const { env, fetchImpl, log } = deps;
+  const roots = deps.roots ?? hubRoots(env, { need });
+  return {
+    env,
+    log,
+    roots,
+    git: deps.git ?? makeGit(roots.STUDIO_HUB_CLONE),
+    studio: deps.studio ?? makeStudio({ env, roots, childEnv: studioChildEnv(env, roots), log }),
+    prs: deps.prs ?? makePrs({ env, fetchImpl }),
+    web: deps.web ?? makeWeb({ env, fetchImpl }),
+    call: deps.call !== undefined ? deps.call : makeCaller(env),
+    now: deps.now ?? (() => new Date()),
+    authCheck:
+      deps.authCheck ??
+      (async () => {
+        await refreshBearer(env, fetchImpl);
+        return checkAdmin(env, fetchImpl);
+      }),
+    startRefresher: deps.startRefresher ?? ((onError) => startRefresher({ env, fetchImpl, onError })),
+    startPreview: deps.startPreview ?? ((slug) => startPreview({ roots, slug, log })),
+  };
+}
+
+function parseFlags(rest, known) {
+  const flags = {};
+  const positional = [];
+  let passthrough = [];
+  for (let i = 0; i < rest.length; i += 1) {
+    const a = rest[i];
+    if (a === '--') {
+      passthrough = rest.slice(i + 1);
+      break;
+    }
+    if (a.startsWith('--')) {
+      const [name, value] = a.slice(2).split(/=(.*)/s);
+      if (!(name in known)) throw new HubError('usage', `unknown option --${name}\n${USAGE}`);
+      if (known[name] === 'value') {
+        const v = value ?? rest[(i += 1)];
+        if (v === undefined) throw new HubError('usage', `--${name} needs a value`);
+        flags[name] = v;
+      } else flags[name] = true;
+    } else positional.push(a);
+  }
+  return { flags, positional, passthrough };
+}
+
+async function hubMain(argv, deps) {
+  const { log } = deps;
+  const [cmd, ...rest] = argv;
+  if (!cmd) {
+    log(USAGE);
+    return EXIT.usage;
+  }
+  try {
+    if (cmd === 'verify') {
+      const { flags, positional } = parseFlags(rest, { plain: 'flag', dist: 'value' });
+      if (positional.length !== 1) throw new HubError('usage', USAGE);
+      const url = positional[0];
+      try {
+        new URL(url);
+      } catch {
+        throw new HubError('usage', `not a URL: ${url}`);
+      }
+      const result = flags.plain
+        ? await (deps.verifyPlain ?? verifyPlain)(url)
+        : await (deps.verifyWithBridge ?? verifyWithBridge)(url, { distDir: flags.dist ?? join(REPO_ROOT, 'dist'), log });
+      (deps.out ?? ((s) => process.stdout.write(s)))(`${JSON.stringify(result, null, 2)}\n`);
+      return result.exit;
+    }
+    const known = { 'record-publish': { reactivate: 'flag' }, publish: { reactivate: 'flag' }, unpublish: {}, preview: { 'no-build': 'flag' } }[cmd];
+    if (!known) throw new HubError('usage', USAGE);
+    const { flags, positional, passthrough } = parseFlags(rest, known);
+    if (positional.length !== 1 || (passthrough.length && cmd !== 'publish')) throw new HubError('usage', USAGE);
+    const slug = checkSlug(positional[0]); // B1 before anything else is read
+    if (cmd === 'record-publish') return await recordPublish(slug, { reactivate: Boolean(flags.reactivate) }, hubDeps(deps, ['STUDIO_HUB_CLONE', 'STUDIO_ROOT']));
+    if (cmd === 'unpublish') return await unpublish(slug, hubDeps(deps, ['STUDIO_HUB_CLONE', 'STUDIO_ROOT']));
+    if (cmd === 'publish') {
+      return await publish(slug, { reactivate: Boolean(flags.reactivate), studioArgs: passthrough }, hubDeps(deps, ['STUDIO_HUB_CLONE', 'STUDIO_HUB_PREVIEW', 'STUDIO_ROOT']));
+    }
+    // preview
+    const roots = deps.roots ?? hubRoots(deps.env, { need: ['STUDIO_HUB_CLONE', 'STUDIO_HUB_PREVIEW'] });
+    const p = await (deps.startPreviewImpl ?? startPreview)({ roots, slug, build: !flags['no-build'], log });
+    log(`hub preview ${slug}: serving until interrupted (Ctrl-C)`);
+    await (deps.waitForSignal ?? (() => new Promise((r) => {
+      process.once('SIGINT', r);
+      process.once('SIGTERM', r);
+    })))();
+    await p.stop();
+    return FLOW_EXIT.ok;
+  } catch (err) {
+    if (err instanceof HubError) {
+      log(`hub ${cmd}: ${err.message}`);
+      return err.code;
+    }
+    if (err instanceof AuthError) {
+      log(`hub ${cmd}: ${err.message}`);
+      return EXIT[err.kind] ?? 1;
+    }
+    log(`hub ${cmd}: unexpected ${err.code ?? err.name}: ${err.message}`);
+    return FLOW_EXIT.failed;
+  }
+}
+
 export async function main(argv, deps) {
   const { env, fetchImpl, log, stdin } = deps;
   const [group, cmd, ...rest] = argv;
-  if (group !== 'auth' || !['import', 'set', 'check', 'refresh'].includes(cmd)) {
-    log('usage: hub auth import <storage-state.json> | hub auth set | hub auth check | hub auth refresh');
+  if (group !== 'auth') return hubMain(argv, deps);
+  if (!['import', 'set', 'check', 'refresh'].includes(cmd)) {
+    log(USAGE);
     return EXIT.usage;
   }
   const call = deps.call ?? makeCaller(env);
@@ -173,6 +318,9 @@ function invokedDirectly() {
 }
 
 if (invokedDirectly()) {
+  // stdout carries only machine output (`hub verify`'s JSON); the UI Bridge
+  // relay logs through console.log, so every console channel goes to stderr.
+  for (const k of ['log', 'info', 'debug', 'warn']) console[k] = (...a) => process.stderr.write(`${format(...a)}\n`);
   main(process.argv.slice(2), {
     env: process.env,
     fetchImpl: fetch,
