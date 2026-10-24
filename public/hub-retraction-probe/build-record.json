@@ -1,0 +1,492 @@
+{
+  "content_sha256": "6a8cbd4263fd7710c601b26ecf04346cfa46a2b95c29ef7b44cfd4facf2e7a1b",
+  "document": {
+    "gates": {
+      "cleared": 21,
+      "registered": 33
+    },
+    "generated_at": "2026-10-24T23:40:13.326265543Z",
+    "product": {
+      "repos": [
+        "qontinui/qontinui-studio"
+      ],
+      "slug": "hub-retraction-probe",
+      "title": "hub-retraction-probe",
+      "window_end": null,
+      "window_start": null
+    },
+    "prs": [
+      {
+        "attempts": 7,
+        "ci_duration_secs": 481,
+        "landed_at": "2026-10-13T18:53:29.388408Z",
+        "number": 1,
+        "opened_at": "2026-10-09T20:36:29Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 649,
+        "landed_at": "2026-10-13T20:04:46.053676Z",
+        "number": 2,
+        "opened_at": "2026-10-10T03:42:18Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 234,
+        "landed_at": "2026-10-13T19:18:24.436703Z",
+        "number": 3,
+        "opened_at": "2026-10-10T16:16:08Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 4,
+        "ci_duration_secs": 1809,
+        "landed_at": "2026-10-14T19:00:39.039805Z",
+        "number": 4,
+        "opened_at": "2026-10-10T20:53:03Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 4,
+        "ci_duration_secs": 1917,
+        "landed_at": "2026-10-17T03:43:36.977584Z",
+        "number": 5,
+        "opened_at": "2026-10-11T10:03:38Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 754,
+        "landed_at": "2026-10-14T21:48:55.484930Z",
+        "number": 6,
+        "opened_at": "2026-10-14T21:24:17Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 781,
+        "landed_at": "2026-10-16T23:10:21.652527Z",
+        "number": 7,
+        "opened_at": "2026-10-16T23:00:31Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 542,
+        "landed_at": "2026-10-17T04:20:38.655467Z",
+        "number": 8,
+        "opened_at": "2026-10-17T03:37:28Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 2574,
+        "landed_at": "2026-10-17T04:09:26.157967Z",
+        "number": 9,
+        "opened_at": "2026-10-17T03:40:56Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 1142,
+        "landed_at": "2026-10-17T05:21:40.694352Z",
+        "number": 10,
+        "opened_at": "2026-10-17T04:26:49Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 3791,
+        "landed_at": "2026-10-17T05:41:55.651376Z",
+        "number": 11,
+        "opened_at": "2026-10-17T04:55:54Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 2983,
+        "landed_at": "2026-10-17T05:47:40.242813Z",
+        "number": 12,
+        "opened_at": "2026-10-17T05:37:41Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 3257,
+        "landed_at": "2026-10-17T06:43:36.164324Z",
+        "number": 13,
+        "opened_at": "2026-10-17T06:00:22Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 3808,
+        "landed_at": "2026-10-17T06:43:49.229870Z",
+        "number": 14,
+        "opened_at": "2026-10-17T06:20:25Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 4055,
+        "landed_at": "2026-10-17T07:17:56.989158Z",
+        "number": 15,
+        "opened_at": "2026-10-17T07:08:25Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 546,
+        "landed_at": "2026-10-17T08:27:18.988039Z",
+        "number": 16,
+        "opened_at": "2026-10-17T07:32:43Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 4188,
+        "landed_at": "2026-10-17T08:07:46.112680Z",
+        "number": 17,
+        "opened_at": "2026-10-17T07:47:32Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 4526,
+        "landed_at": "2026-10-17T08:55:46.071226Z",
+        "number": 18,
+        "opened_at": "2026-10-17T08:06:17Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 4,
+        "ci_duration_secs": 9238,
+        "landed_at": "2026-10-17T09:29:27.844085Z",
+        "number": 19,
+        "opened_at": "2026-10-17T08:06:37Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 5275,
+        "landed_at": "2026-10-17T09:29:54.158366Z",
+        "number": 20,
+        "opened_at": "2026-10-17T08:41:20Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 10,
+        "ci_duration_secs": 5085,
+        "landed_at": "2026-10-19T11:08:18.767143Z",
+        "number": 21,
+        "opened_at": "2026-10-17T08:49:03Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 5226,
+        "landed_at": "2026-10-17T09:36:02.485236Z",
+        "number": 22,
+        "opened_at": "2026-10-17T09:04:19Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 5155,
+        "landed_at": "2026-10-17T09:43:48.395276Z",
+        "number": 23,
+        "opened_at": "2026-10-17T09:15:03Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 2999,
+        "landed_at": "2026-10-17T10:00:56.775555Z",
+        "number": 24,
+        "opened_at": "2026-10-17T09:50:59Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 3252,
+        "landed_at": "2026-10-17T12:06:27.449347Z",
+        "number": 25,
+        "opened_at": "2026-10-17T10:31:54Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 5717,
+        "landed_at": "2026-10-17T11:19:56.676620Z",
+        "number": 26,
+        "opened_at": "2026-10-17T10:38:01Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 267,
+        "landed_at": "2026-10-17T14:20:09.621727Z",
+        "number": 27,
+        "opened_at": "2026-10-17T12:53:51Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 3,
+        "ci_duration_secs": 1361,
+        "landed_at": null,
+        "number": 28,
+        "opened_at": "2026-10-20T00:58:24Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 2985,
+        "landed_at": "2026-10-21T10:00:55.078374Z",
+        "number": 29,
+        "opened_at": "2026-10-21T09:54:44Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 2759,
+        "landed_at": "2026-10-22T21:16:04.777965Z",
+        "number": 30,
+        "opened_at": "2026-10-22T19:02:16Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 2787,
+        "landed_at": "2026-10-22T22:00:32.019396Z",
+        "number": 31,
+        "opened_at": "2026-10-22T19:10:20Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 3280,
+        "landed_at": "2026-10-22T19:26:26.563665Z",
+        "number": 32,
+        "opened_at": "2026-10-22T19:20:58Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 2967,
+        "landed_at": "2026-10-22T22:19:07.343266Z",
+        "number": 33,
+        "opened_at": "2026-10-22T19:33:16Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 260,
+        "landed_at": "2026-10-22T20:02:57.857122Z",
+        "number": 34,
+        "opened_at": "2026-10-22T19:35:41Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 271,
+        "landed_at": "2026-10-22T20:47:15.247986Z",
+        "number": 35,
+        "opened_at": "2026-10-22T19:38:55Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      },
+      {
+        "attempts": 2,
+        "ci_duration_secs": 1585,
+        "landed_at": "2026-10-24T23:32:19.846470Z",
+        "number": 36,
+        "opened_at": "2026-10-24T23:25:29Z",
+        "repo": "qontinui/qontinui-studio",
+        "title": null
+      }
+    ],
+    "schema": "build-record/1",
+    "self_corrections": {
+      "gate_reopens": null,
+      "red_ci_fixed": 1,
+      "review_findings_fixed": null
+    },
+    "sessions": {
+      "count": null,
+      "unknown_reason": "sessions.count: census_provisional"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-09T16:49:57.465560Z",
+        "from_status": null,
+        "to_status": "in_progress",
+        "work_unit": "2026-10-09-qontinui-marketing-studio-animated-process-explainers"
+      },
+      {
+        "at": "2026-10-09T16:51:53.493687Z",
+        "from_status": null,
+        "to_status": "in_progress",
+        "work_unit": "2026-10-09-factory-built-product-portfolio-and-launch-kit"
+      },
+      {
+        "at": "2026-10-09T17:12:57.768190Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-09-qontinui-marketing-studio-animated-process-explainers"
+      },
+      {
+        "at": "2026-10-10T17:14:39.893135Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-09-factory-built-product-portfolio-and-launch-kit"
+      },
+      {
+        "at": "2026-10-13T00:43:57.860515Z",
+        "from_status": null,
+        "to_status": "draft",
+        "work_unit": "2026-10-13-image-generation-and-visual-judgment"
+      },
+      {
+        "at": "2026-10-13T06:55:53.645509Z",
+        "from_status": "draft",
+        "to_status": "vetted",
+        "work_unit": "2026-10-13-image-generation-and-visual-judgment"
+      },
+      {
+        "at": "2026-10-13T07:05:27.011855Z",
+        "from_status": "vetted",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-13-image-generation-and-visual-judgment"
+      },
+      {
+        "at": "2026-10-17T07:25:41.536214Z",
+        "from_status": null,
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      },
+      {
+        "at": "2026-10-17T07:38:28.387952Z",
+        "from_status": null,
+        "to_status": "draft",
+        "work_unit": "2026-10-17-free-image-generation-local-gpu-and-private-ui-bridge-wrappers"
+      },
+      {
+        "at": "2026-10-17T07:58:06.177274Z",
+        "from_status": "draft",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-free-image-generation-local-gpu-and-private-ui-bridge-wrappers"
+      },
+      {
+        "at": "2026-10-17T08:26:40.977125Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      },
+      {
+        "at": "2026-10-17T10:41:31.297937Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-free-image-generation-local-gpu-and-private-ui-bridge-wrappers"
+      },
+      {
+        "at": "2026-10-17T12:15:51.607367Z",
+        "from_status": "in_progress",
+        "to_status": "shipped",
+        "work_unit": "2026-10-09-qontinui-marketing-studio-animated-process-explainers"
+      },
+      {
+        "at": "2026-10-21T07:07:48.098009Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      }
+    ],
+    "unknowns": [
+      "timeline: not_established",
+      "timeline[].from_status: not_established",
+      "prs[].title: door_unavailable",
+      "self_corrections.review_findings_fixed: not_established",
+      "self_corrections.gate_reopens: not_established",
+      "sessions.count: census_provisional"
+    ],
+    "wall_clock_secs": 1320142,
+    "work_units": [
+      {
+        "shipped_at": null,
+        "slug": "2026-10-09-factory-built-product-portfolio-and-launch-kit",
+        "status": "in_progress",
+        "title": "Factory-built product portfolio and launch kit",
+        "vetted_at": null
+      },
+      {
+        "shipped_at": "2026-10-17T12:15:51.607367Z",
+        "slug": "2026-10-09-qontinui-marketing-studio-animated-process-explainers",
+        "status": "shipped",
+        "title": "Qontinui marketing studio: animated process explainers",
+        "vetted_at": null
+      },
+      {
+        "shipped_at": null,
+        "slug": "2026-10-13-image-generation-and-visual-judgment",
+        "status": "in_progress",
+        "title": "Plan: Image generation and visual judgment in the software factory \u2014 a licensed local image provider, image slots as specs, an image-aware UI Bridge, and judges that can fail",
+        "vetted_at": "2026-10-13T06:55:53.645509Z"
+      },
+      {
+        "shipped_at": null,
+        "slug": "2026-10-17-build-qontinui-io-factory-hub",
+        "status": "in_progress",
+        "title": "build.qontinui.io \u2014 the factory's visitor gallery",
+        "vetted_at": null
+      },
+      {
+        "shipped_at": null,
+        "slug": "2026-10-17-free-image-generation-local-gpu-and-private-ui-bridge-wrappers",
+        "status": "in_progress",
+        "title": "Plan: Free image generation for qontinui-studio: the spaceship GPU first, then the operator's own Gemini and ChatGPT web accounts through private UI Bridge wrappers",
+        "vetted_at": null
+      }
+    ]
+  },
+  "public_slug": "hub-retraction-probe",
+  "published_at": "2026-10-24T23:40:13.501549Z",
+  "source": "public",
+  "url": "https://api.qontinui.io/api/v1/public/build-records/hub-retraction-probe",
+  "version": 1
+}
