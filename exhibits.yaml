@@ -4,3 +4,4 @@
 exhibits:
   - slug: example-widget
     fixture: fixtures/example-widget.json
+  - slug: qontinui-studio

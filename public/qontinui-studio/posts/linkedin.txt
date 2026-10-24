@@ -1,0 +1,8 @@
+qontinui-studio: Launch kits and labelled, provenance-carrying assets for products the Qontinui software factory ships.
+
+Built by the Qontinui software factory. Plans shipped: 1; Pull requests landed: 34; CI runs: 88; Wall-clock time: 13d 5h; Red CI fixed by the factory: 1.
+
+qontinui-studio turns a product the factory shipped into a launch: its build record rendered as a "How this was built" page, screenshots and a walkthrough of the running product, social cards and posts, and a short film. Decorative AI imagery is optional, gated by licence and provenance checks, and always labelled as AI-generated.
+
+How it was built, every number from its build record: https://build.qontinui.io/qontinui-studio/how-it-was-built.html
+https://github.com/qontinui/qontinui-studio

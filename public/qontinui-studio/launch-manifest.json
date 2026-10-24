@@ -1,0 +1,113 @@
+{
+  "created_at": "2026-10-24T23:36:59.260364+00:00",
+  "files": {
+    "build-record.json": "1f37924a05cc5b0c5180f1eca0f4d83e0024b513681c06775a43febeb3d1d7b8",
+    "how-it-was-built.html": "c8446192712e4708477d72fba4c40b54900ae66e7e85a2345ea29a0bc04e5414",
+    "index.html": "bcfd597858347edbaf453c9fb27f3ae7cd84508b3b77feb7a5515613edb46dd0",
+    "posts/bluesky.txt": "301c314106c3f846c266ef88d1808cc7dc793736e41c6d26b7da7ff928d81c1b",
+    "posts/linkedin.txt": "dfa33b696826e501f1935ea22670b1c5d7f6671a5e257e4fe1e997a1f5a89837",
+    "posts/mastodon.txt": "4a3a6165ce8237344f64e8e65227c8a88b8f62883a8e44cb9d7e5898ef07c1ca",
+    "posts/x.txt": "2b7064904d8e19fb67b9f438fbc81ed206119203c7e45d0b204d8836f7f71b13",
+    "social/linkedin.png": "16f41dcaa285ae0db5f6323fd4639e197bb8d0e104766dcc6d57d77103036155",
+    "social/og.png": "1c8587ab35e8974206098c51f104a6e3e8f56c384a9f2fa1f8839ef75b1c1df7",
+    "social/square.png": "0a820ce8a276730f66677777a416ae8e66f10fb06bbef3fcd2bf435e87136bfc",
+    "social/x.png": "577b5990b2c3e09e8e83621d3bdc26cd0c8dfbbdc1b6988aea11e9039198e0b7",
+    "styles.css": "3df3e1283243d10176ffc926a34c6c4e383c600a8f2cbd0a94894f9115c339ac",
+    "video/film.json": "89d5ab9765b65556680a44295de5205817f52c0fa45506bcecaefddcc1e49b71",
+    "video/launch.mp4": "deb5ed1beda0861d84a5dad88c3522414f908ae69a80678318e10ae68fe3e5bb"
+  },
+  "film": {
+    "actual_seconds": 60.0,
+    "omitted": {
+      "broll": "no published decorative asset (AI b-roll is optional)",
+      "replay": "omitted: the build-record replay scene (sibling plan 2026-10-09-qontinui-marketing-studio-animated-process-explainers, Phase 3) has no renderer available to this kit",
+      "walkthrough": "no capture of the running product is available"
+    },
+    "path": "video/launch.mp4",
+    "segments": [
+      {
+        "name": "title",
+        "note": null,
+        "seconds": 3.0,
+        "source": "product definition"
+      },
+      {
+        "name": "summary",
+        "note": null,
+        "seconds": 54.0,
+        "source": "build record (every value names its field)"
+      },
+      {
+        "name": "closing",
+        "note": null,
+        "seconds": 3.0,
+        "source": "product definition + public build-record URL"
+      }
+    ],
+    "target_seconds": 60.0
+  },
+  "images": [
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/og.png",
+      "sha256": "1c8587ab35e8974206098c51f104a6e3e8f56c384a9f2fa1f8839ef75b1c1df7",
+      "size": [
+        1200,
+        630
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/x.png",
+      "sha256": "577b5990b2c3e09e8e83621d3bdc26cd0c8dfbbdc1b6988aea11e9039198e0b7",
+      "size": [
+        1200,
+        675
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/linkedin.png",
+      "sha256": "16f41dcaa285ae0db5f6323fd4639e197bb8d0e104766dcc6d57d77103036155",
+      "size": [
+        1200,
+        627
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/square.png",
+      "sha256": "0a820ce8a276730f66677777a416ae8e66f10fb06bbef3fcd2bf435e87136bfc",
+      "size": [
+        1080,
+        1080
+      ]
+    }
+  ],
+  "launch_id": "qontinui-studio-20261024T233658",
+  "pages": [
+    "index.html",
+    "how-it-was-built.html"
+  ],
+  "product": {
+    "repos": [
+      "qontinui/qontinui-studio"
+    ],
+    "slug": "qontinui-studio",
+    "title": "qontinui-studio"
+  },
+  "record": {
+    "content_sha256": "ac683fbdad1597c97e508fc419c0d41ec191dc0c847098f55d56005a2e9fc089",
+    "present": true,
+    "public_slug": "qontinui-studio",
+    "public_url": "https://build.qontinui.io/qontinui-studio/how-it-was-built.html",
+    "source": "public",
+    "url": "https://api.qontinui.io/api/v1/public/build-records/qontinui-studio",
+    "version": 1
+  },
+  "schema": "launch-bundle/1"
+}

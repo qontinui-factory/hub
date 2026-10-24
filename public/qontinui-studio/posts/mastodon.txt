@@ -1,0 +1,6 @@
+qontinui-studio: Launch kits and labelled, provenance-carrying assets for products the Qontinui software factory ships.
+
+Built by the Qontinui software factory. Plans shipped: 1; Pull requests landed: 34; CI runs: 88; Wall-clock time: 13d 5h; Red CI fixed by the factory: 1.
+
+Build record: https://build.qontinui.io/qontinui-studio/how-it-was-built.html
+https://github.com/qontinui/qontinui-studio
