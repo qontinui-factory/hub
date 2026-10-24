@@ -1,0 +1,113 @@
+{
+  "created_at": "2026-10-24T23:57:26.208275+00:00",
+  "files": {
+    "build-record.json": "b3df54151a0eca14ddb9eb7ea028d3375004392af80637a131e97cb96d4d9d87",
+    "how-it-was-built.html": "ba96941e16bc0c86c4b57baccd4d20e386ad39eada567a246dd2708c2e4ca59c",
+    "index.html": "5bc335cc403161789e6ecaeafd9d45ff0245ec957bdb1ad2e37c961f4006663a",
+    "posts/bluesky.txt": "6b772d079c4ef8422b28e615510cd1ca06082b713df73678ffc02a556aada6b6",
+    "posts/linkedin.txt": "78ebbfbb47fa8b24effa66ff56a3c3428ba1ccf800e60227cf01150940d31831",
+    "posts/mastodon.txt": "4713ba1e9410b8be9dbfa7ee8a4e17e6932677a5b75b27a1fe022733d4e3eae0",
+    "posts/x.txt": "6b772d079c4ef8422b28e615510cd1ca06082b713df73678ffc02a556aada6b6",
+    "social/linkedin.png": "1f0a876022d4de9fbc8fbe66b97038f7e09e28924c78c699ec553cc6dd771831",
+    "social/og.png": "46f7f889316e6bf37bb8d1c334872dd213c333a99f708edfac201e8c3444905b",
+    "social/square.png": "057a2df150bbfd060592ec3e8b476f1f6e6e191c404a19d5b9c144cf52533b83",
+    "social/x.png": "9d636a616ccdb15957cace4f47a29f219e1c174140975fdcf7c3eea14ff52570",
+    "styles.css": "3df3e1283243d10176ffc926a34c6c4e383c600a8f2cbd0a94894f9115c339ac",
+    "video/film.json": "89d5ab9765b65556680a44295de5205817f52c0fa45506bcecaefddcc1e49b71",
+    "video/launch.mp4": "fd7e6fdcece1c0868cadafa29754cf85e1d6474982cc80dde1071f00f875aa7f"
+  },
+  "film": {
+    "actual_seconds": 60.0,
+    "omitted": {
+      "broll": "no published decorative asset (AI b-roll is optional)",
+      "replay": "omitted: the build-record replay scene (sibling plan 2026-10-09-qontinui-marketing-studio-animated-process-explainers, Phase 3) has no renderer available to this kit",
+      "walkthrough": "no capture of the running product is available"
+    },
+    "path": "video/launch.mp4",
+    "segments": [
+      {
+        "name": "title",
+        "note": null,
+        "seconds": 3.0,
+        "source": "product definition"
+      },
+      {
+        "name": "summary",
+        "note": null,
+        "seconds": 54.0,
+        "source": "build record (every value names its field)"
+      },
+      {
+        "name": "closing",
+        "note": null,
+        "seconds": 3.0,
+        "source": "product definition + public build-record URL"
+      }
+    ],
+    "target_seconds": 60.0
+  },
+  "images": [
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/og.png",
+      "sha256": "46f7f889316e6bf37bb8d1c334872dd213c333a99f708edfac201e8c3444905b",
+      "size": [
+        1200,
+        630
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/x.png",
+      "sha256": "9d636a616ccdb15957cace4f47a29f219e1c174140975fdcf7c3eea14ff52570",
+      "size": [
+        1200,
+        675
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/linkedin.png",
+      "sha256": "1f0a876022d4de9fbc8fbe66b97038f7e09e28924c78c699ec553cc6dd771831",
+      "size": [
+        1200,
+        627
+      ]
+    },
+    {
+      "ai_generated": false,
+      "kind": "social",
+      "path": "social/square.png",
+      "sha256": "057a2df150bbfd060592ec3e8b476f1f6e6e191c404a19d5b9c144cf52533b83",
+      "size": [
+        1080,
+        1080
+      ]
+    }
+  ],
+  "launch_id": "qontinui-factory-hub-20261024T235726",
+  "pages": [
+    "index.html",
+    "how-it-was-built.html"
+  ],
+  "product": {
+    "repos": [
+      "qontinui-factory/hub"
+    ],
+    "slug": "qontinui-factory-hub",
+    "title": "qontinui-factory-hub"
+  },
+  "record": {
+    "content_sha256": "560c1e3b985e86c6d9d31bcca7c6cf63a7c2870137133b921c8a0048c20b493b",
+    "present": true,
+    "public_slug": "qontinui-factory-hub",
+    "public_url": "https://build.qontinui.io/qontinui-factory-hub/how-it-was-built.html",
+    "source": "public",
+    "url": "https://api.qontinui.io/api/v1/public/build-records/qontinui-factory-hub",
+    "version": 1
+  },
+  "schema": "launch-bundle/1"
+}

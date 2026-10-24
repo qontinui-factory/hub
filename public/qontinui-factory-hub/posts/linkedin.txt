@@ -1,0 +1,8 @@
+qontinui-factory-hub: The Qontinui software factory's visitor gallery — every exhibit built from a published, checkable build record.
+
+Built by the Qontinui software factory. Plans shipped: 0; Pull requests landed: 7; CI runs: 7; Wall-clock time: 7d 16h; Red CI fixed by the factory: 0.
+
+build.qontinui.io shows what the Qontinui software factory has shipped. Each exhibit is rendered from a product's public build record, whose content_sha256 a visitor can recompute, with replayed scenes of how it was built and a launch bundle served beside it.
+
+How it was built, every number from its build record: https://build.qontinui.io/qontinui-factory-hub/how-it-was-built.html
+https://build.qontinui.io/

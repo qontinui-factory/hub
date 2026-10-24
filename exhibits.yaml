@@ -4,3 +4,4 @@
 # fixture (fixtures/example-widget.json, A4) stays for the tests only.
 exhibits:
   - slug: qontinui-studio
+  - slug: qontinui-factory-hub

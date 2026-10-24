@@ -1,0 +1,136 @@
+{
+  "content_sha256": "560c1e3b985e86c6d9d31bcca7c6cf63a7c2870137133b921c8a0048c20b493b",
+  "document": {
+    "gates": {
+      "cleared": 4,
+      "registered": 10
+    },
+    "generated_at": "2026-10-24T23:57:13.792021710Z",
+    "product": {
+      "repos": [
+        "qontinui-factory/hub"
+      ],
+      "slug": "qontinui-factory-hub",
+      "title": "qontinui-factory-hub",
+      "window_end": null,
+      "window_start": null
+    },
+    "prs": [
+      {
+        "attempts": 1,
+        "ci_duration_secs": 42,
+        "landed_at": "2026-10-17T10:31:23.574159Z",
+        "number": 2,
+        "opened_at": "2026-10-17T10:04:32Z",
+        "repo": "qontinui-factory/hub",
+        "title": "feat: the gallery, tour and about pages on a fixture exhibit (Phase 1)"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 49,
+        "landed_at": "2026-10-20T17:45:28.795269Z",
+        "number": 4,
+        "opened_at": "2026-10-20T17:13:32Z",
+        "repo": "qontinui-factory/hub",
+        "title": "feat: hub auth \u2014 the studio's qontinui-web credential (Phase 3)"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 58,
+        "landed_at": "2026-10-21T08:40:26.597119Z",
+        "number": 5,
+        "opened_at": "2026-10-21T08:38:32Z",
+        "repo": "qontinui-factory/hub",
+        "title": "feat: hub publish, unpublish, record-publish, preview and verify (Phase 3)"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 51,
+        "landed_at": "2026-10-24T23:38:54.376905Z",
+        "number": 6,
+        "opened_at": "2026-10-24T23:37:11Z",
+        "repo": "qontinui-factory/hub",
+        "title": "publish: qontinui-studio (launch qontinui-studio-20261024T233658)"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 57,
+        "landed_at": "2026-10-24T23:43:01.167604Z",
+        "number": 7,
+        "opened_at": "2026-10-24T23:40:32Z",
+        "repo": "qontinui-factory/hub",
+        "title": "publish: hub-retraction-probe (launch hub-retraction-probe-20261024T234020)"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 45,
+        "landed_at": "2026-10-24T23:45:38.499876Z",
+        "number": 8,
+        "opened_at": "2026-10-24T23:44:08Z",
+        "repo": "qontinui-factory/hub",
+        "title": "unpublish: hub-retraction-probe"
+      },
+      {
+        "attempts": 1,
+        "ci_duration_secs": 46,
+        "landed_at": "2026-10-24T23:56:16.686620Z",
+        "number": 9,
+        "opened_at": "2026-10-24T23:54:31Z",
+        "repo": "qontinui-factory/hub",
+        "title": "feat: the gallery reads only live records (Phase 3)"
+      }
+    ],
+    "schema": "build-record/1",
+    "self_corrections": {
+      "gate_reopens": null,
+      "red_ci_fixed": 0,
+      "review_findings_fixed": null
+    },
+    "sessions": {
+      "count": null,
+      "unknown_reason": "sessions.count: census_provisional"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-17T07:25:41.536214Z",
+        "from_status": null,
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      },
+      {
+        "at": "2026-10-17T08:26:40.977125Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      },
+      {
+        "at": "2026-10-21T07:07:48.098009Z",
+        "from_status": "in_progress",
+        "to_status": "in_progress",
+        "work_unit": "2026-10-17-build-qontinui-io-factory-hub"
+      }
+    ],
+    "unknowns": [
+      "timeline: not_established",
+      "timeline[].from_status: not_established",
+      "self_corrections.review_findings_fixed: not_established",
+      "self_corrections.gate_reopens: not_established",
+      "sessions.count: census_provisional"
+    ],
+    "wall_clock_secs": 664235,
+    "work_units": [
+      {
+        "shipped_at": null,
+        "slug": "2026-10-17-build-qontinui-io-factory-hub",
+        "status": "in_progress",
+        "title": "build.qontinui.io \u2014 the factory's visitor gallery",
+        "vetted_at": null
+      }
+    ]
+  },
+  "public_slug": "qontinui-factory-hub",
+  "published_at": "2026-10-24T23:57:13.977366Z",
+  "source": "public",
+  "url": "https://api.qontinui.io/api/v1/public/build-records/qontinui-factory-hub",
+  "version": 1
+}
