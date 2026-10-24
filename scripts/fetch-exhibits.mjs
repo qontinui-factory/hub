@@ -1,7 +1,6 @@
 // Build-time read of every declared exhibit (plan D1, D2, A1, AI4.5).
 //
-// - Each exhibit comes from qontinui-web's public snapshot route, or from a
-//   committed fixture (A4) until real records are public.
+// - Each exhibit comes from qontinui-web's public snapshot route.
 // - The snapshot's content_sha256 is RECOMPUTED; a mismatch fails the build.
 // - A 404 (unpublished or retracted) drops the exhibit, with a log line.
 // - A1 guard: a committed bundle at public/<slug>/ whose record 404s fails
@@ -39,10 +38,6 @@ function touchedSlugs() {
 const OUT = process.env.HUB_EXHIBITS_OUT ?? 'src/data/exhibits.json';
 
 export async function readSnapshot(entry, fetchImpl = fetch) {
-  if (entry.fixture) {
-    const raw = JSON.parse(readFileSync(entry.fixture, 'utf8'));
-    return { status: 200, body: raw.snapshot };
-  }
   const res = await fetchImpl(`${API}/${encodeURIComponent(entry.slug)}`, {
     headers: { accept: 'application/json' },
   });
@@ -80,7 +75,7 @@ export async function collect(entries, opts = {}) {
       continue;
     }
     verify(entry.slug, snap.body);
-    shown.push({ slug: entry.slug, fixture: Boolean(entry.fixture), ...snap.body });
+    shown.push({ slug: entry.slug, ...snap.body });
   }
   return shown;
 }

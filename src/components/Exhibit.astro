@@ -9,7 +9,6 @@ const gaps = unknowns(doc);
 <article class="exhibit" data-exhibit={exhibit.slug}>
   <header>
     <h3 data-exhibit={exhibit.slug}>{doc.product.title}</h3>
-    {exhibit.fixture && <span class="tag" title="A synthetic record committed so the page builds before a real one is public">illustrative fixture</span>}
   </header>
   <dl class="board">
     {board.map((f) => (
@@ -36,6 +35,6 @@ const gaps = unknowns(doc);
     <summary>Verify this record</summary>
     <p>Snapshot v{exhibit.version}, published {exhibit.published_at}.</p>
     <p>content_sha256 <code>{exhibit.content_sha256}</code>, recomputed at build time.</p>
-    {!exhibit.fixture && <p><a href={`https://api.qontinui.io/api/v1/public/build-records/${exhibit.slug}`}>The public record</a></p>}
+    <p><a href={`https://api.qontinui.io/api/v1/public/build-records/${exhibit.slug}`}>The public record</a></p>
   </details>
 </article>

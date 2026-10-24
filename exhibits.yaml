@@ -1,7 +1,6 @@
 # The exhibits the gallery shows, in order (plan D2: declared, not discovered).
 # `hub publish` appends a slug; `hub unpublish` removes it (AI2, B6).
-# Until a real record is public (Phase 3), the build reads fixtures (A4).
+# Every exhibit is read live from its public build record. The Phase 1
+# fixture (fixtures/example-widget.json, A4) stays for the tests only.
 exhibits:
-  - slug: example-widget
-    fixture: fixtures/example-widget.json
   - slug: qontinui-studio

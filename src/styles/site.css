@@ -32,7 +32,6 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
 .exhibit { background: var(--panel); border: 1px solid var(--rail); border-radius: 12px; padding: 20px; margin: 16px 0; }
 .exhibit header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
 .exhibit h3 { margin: 0; }
-.tag { font-size: .75rem; color: var(--ink-3); border: 1px solid var(--rail); border-radius: 999px; padding: 2px 8px; }
 .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
 .fact { border-left: 2px solid var(--glow); padding-left: 10px; }
 .fact dt { font-size: .75rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }

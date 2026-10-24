@@ -14,9 +14,8 @@ pnpm test
 ```
 
 - `exhibits.yaml` lists the exhibits. Each is read at build time from
-  `https://api.qontinui.io/api/v1/public/build-records/<slug>` (or a committed
-  fixture, until real records are public), and its `content_sha256` is
-  recomputed (`scripts/canonical.mjs`); a mismatch fails the build.
+  `https://api.qontinui.io/api/v1/public/build-records/<slug>`, and its
+  `content_sha256` is recomputed (`scripts/canonical.mjs`); a mismatch fails the build.
 - A record that is not published is dropped. A committed launch bundle at
   `public/<slug>/` whose record is not published fails the deploy build.
 - `/_hub/ui-bridge.js` mounts the UI Bridge on every page. It connects to a
