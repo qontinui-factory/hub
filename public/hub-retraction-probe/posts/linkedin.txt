@@ -1,7 +1,0 @@
-hub-retraction-probe: A disposable product the hub publishes and retracts to prove the one-step unpublish.
-
-Built by the Qontinui software factory. Plans shipped: 1; Pull requests landed: 35; CI runs: 90; Wall-clock time: 15d 6h; Red CI fixed by the factory: 1.
-
-hub-retraction-probe exists only to be published to build.qontinui.io and then retracted with `hub unpublish`, proving that an unpublish removes the exhibit, the launch bundle and the public record together. It stays retracted afterwards.
-
-How it was built, every number from its build record: https://build.qontinui.io/hub-retraction-probe/how-it-was-built.html
