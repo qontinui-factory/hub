@@ -46,6 +46,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
 .stamp.pass { background: var(--ok); }
 .stamp.rework { background: var(--act); }
 .stamps.not-recorded, .gaps { color: var(--unknown); font-size: .875rem; }
+.bundle { margin: 12px 0 0; font-size: .875rem; }
 .verify { margin-top: 12px; color: var(--ink-2); font-size: .875rem; }
 .verify code { word-break: break-all; }
 .station { border-top: 1px solid var(--rail); padding: 24px 0; }

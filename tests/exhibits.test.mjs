@@ -1,6 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { collect, guard, verify } from '../scripts/fetch-exhibits.mjs';
+import { collect, guard, hasBundle, verify } from '../scripts/fetch-exhibits.mjs';
 
 const fixture = JSON.parse(readFileSync('fixtures/example-widget.json', 'utf8'));
 
@@ -30,6 +32,28 @@ describe('exhibit reads (plan D1, A1, AI4.5)', () => {
       fetchImpl: stubFetch({ 'example-widget': fixture.snapshot }),
     });
     expect(shown.map((e) => e.slug)).toEqual(['example-widget']);
+  });
+
+  it('marks an exhibit with a committed launch bundle, so the gallery links to it', async () => {
+    const opts = { fetchImpl: stubFetch({ 'example-widget': fixture.snapshot }) };
+    const entry = [{ slug: 'example-widget' }];
+    expect((await collect(entry, { ...opts, bundleExists: true }))[0].has_bundle).toBe(true);
+    expect((await collect(entry, { ...opts, bundleExists: false }))[0].has_bundle).toBe(false);
+  });
+
+  it('counts a bundle only when both linked pages are there', () => {
+    const publicRoot = mkdtempSync(join(tmpdir(), 'hub-bundle-'));
+    try {
+      const dir = join(publicRoot, 'probe');
+      expect(hasBundle('probe', { publicRoot })).toBe(false);
+      mkdirSync(dir);
+      writeFileSync(join(dir, 'index.html'), '');
+      expect(hasBundle('probe', { publicRoot })).toBe(false);
+      writeFileSync(join(dir, 'how-it-was-built.html'), '');
+      expect(hasBundle('probe', { publicRoot })).toBe(true);
+    } finally {
+      rmSync(publicRoot, { recursive: true, force: true });
+    }
   });
 
   it('A1 guard: a committed bundle with a retracted record fails the deploy build', () => {
