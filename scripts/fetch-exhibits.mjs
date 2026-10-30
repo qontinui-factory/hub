@@ -3,12 +3,15 @@
 // - Each exhibit comes from qontinui-web's public snapshot route.
 // - The snapshot's content_sha256 is RECOMPUTED; a mismatch fails the build.
 // - A 404 (unpublished or retracted) drops the exhibit, with a log line.
+// - `has_bundle` says whether public/<slug>/ holds both pages the gallery links
+//   to, so it never links to a missing one (Portofino has no bundle, AI4.6).
 // - A1 guard: a committed bundle at public/<slug>/ whose record 404s fails
 //   the deploy build. In PR CI (HUB_GUARD=pr) it fails only when the PR's
 //   own diff touches public/<slug>/ (HUB_PR_TOUCHED, space-separated slugs);
 //   otherwise it warns.
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 import { load as loadYaml } from 'js-yaml';
 import { contentSha256 } from './canonical.mjs';
 
@@ -36,6 +39,7 @@ function touchedSlugs() {
   }
 }
 const OUT = process.env.HUB_EXHIBITS_OUT ?? 'src/data/exhibits.json';
+const BUNDLE_PAGES = ['index.html', 'how-it-was-built.html'];
 
 export async function readSnapshot(entry, fetchImpl = fetch) {
   const res = await fetchImpl(`${API}/${encodeURIComponent(entry.slug)}`, {
@@ -65,6 +69,18 @@ export function guard(slug, { guardMode = GUARD, touched = TOUCHED, bundleExists
   return 'warn';
 }
 
+// The A1 guard treats any public/<slug>/ as a bundle, so a stale partial
+// directory still fails the deploy. A link needs both pages to be there.
+export function hasBundle(slug, { bundleExists, publicRoot = 'public' } = {}) {
+  if (bundleExists !== undefined) return bundleExists;
+  const dir = join(publicRoot, slug);
+  const complete = BUNDLE_PAGES.every((page) => existsSync(join(dir, page)));
+  if (!complete && existsSync(dir)) {
+    console.warn(`warning: ${dir}/ lacks a bundle page; the gallery shows no link to it`);
+  }
+  return complete;
+}
+
 export async function collect(entries, opts = {}) {
   const shown = [];
   for (const entry of entries) {
@@ -75,7 +91,7 @@ export async function collect(entries, opts = {}) {
       continue;
     }
     verify(entry.slug, snap.body);
-    shown.push({ slug: entry.slug, ...snap.body });
+    shown.push({ slug: entry.slug, ...snap.body, has_bundle: hasBundle(entry.slug, opts) });
   }
   return shown;
 }

@@ -18,6 +18,8 @@ pnpm test
   `content_sha256` is recomputed (`scripts/canonical.mjs`); a mismatch fails the build.
 - A record that is not published is dropped. A committed launch bundle at
   `public/<slug>/` whose record is not published fails the deploy build.
+- An exhibit links to `/<slug>/` and its `how-it-was-built.html` when
+  `public/<slug>/` holds both pages. Otherwise it shows no link.
 - `/_hub/ui-bridge.js` mounts the UI Bridge on every page. It connects to a
   relay only when a verifier sets `window.__QONTINUI_UI_BRIDGE_RELAY__` to a
   `127.0.0.1` URL before the page loads; an ordinary visitor's page opens no

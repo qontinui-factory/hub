@@ -31,6 +31,11 @@ const gaps = unknowns(doc);
     ))}
   </ol>
   {gaps.length > 0 && <p class="gaps">Not recorded: {gaps.join(', ')}.</p>}
+  {exhibit.has_bundle && (
+    <p class="bundle">
+      <a href={`/${exhibit.slug}/`}>Launch page</a> · <a href={`/${exhibit.slug}/how-it-was-built.html`}>How it was built</a>
+    </p>
+  )}
   <details class="verify">
     <summary>Verify this record</summary>
     <p>Snapshot v{exhibit.version}, published {exhibit.published_at}.</p>
