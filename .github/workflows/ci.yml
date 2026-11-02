@@ -4,6 +4,13 @@
 name: ci
 on:
   pull_request:
+  push:
+    branches:
+      # coord's merge engine pushes the rebased candidate here and waits for
+      # these checks; without them its candidate CI never starts.
+      - 'merge-candidate/**'
+      - 'merge-candidate-spec/**'
+      - 'merge-candidate-batch/**'
 permissions:
   contents: read
 jobs:
