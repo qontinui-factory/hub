@@ -1,9 +1,9 @@
 {
-  "created_at": "2026-10-24T23:36:59.260364+00:00",
+  "created_at": "2026-11-02T16:11:00.768327+00:00",
   "files": {
     "build-record.json": "1f37924a05cc5b0c5180f1eca0f4d83e0024b513681c06775a43febeb3d1d7b8",
     "how-it-was-built.html": "c8446192712e4708477d72fba4c40b54900ae66e7e85a2345ea29a0bc04e5414",
-    "index.html": "bcfd597858347edbaf453c9fb27f3ae7cd84508b3b77feb7a5515613edb46dd0",
+    "index.html": "930e9d139c1a988efb11661e40c68ff7ca91404090e6190b0d06578cd7791707",
     "posts/bluesky.txt": "301c314106c3f846c266ef88d1808cc7dc793736e41c6d26b7da7ff928d81c1b",
     "posts/linkedin.txt": "dfa33b696826e501f1935ea22670b1c5d7f6671a5e257e4fe1e997a1f5a89837",
     "posts/mastodon.txt": "4a3a6165ce8237344f64e8e65227c8a88b8f62883a8e44cb9d7e5898ef07c1ca",
@@ -88,7 +88,7 @@
       ]
     }
   ],
-  "launch_id": "qontinui-studio-20261024T233658",
+  "launch_id": "qontinui-studio-20261102T161100",
   "pages": [
     "index.html",
     "how-it-was-built.html"
