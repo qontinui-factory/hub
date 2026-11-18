@@ -5,6 +5,10 @@
 // - A 404 (unpublished or retracted) drops the exhibit, with a log line.
 // - `has_bundle` says whether public/<slug>/ holds both pages the gallery links
 //   to, so it never links to a missing one (Portofino has no bundle, AI4.6).
+// - `featured: true` on an exhibits.yaml entry marks the featured exhibit
+//   (Phase 4). The yaml's order is still the gallery's order (D2), so the
+//   featured entry must be listed first. A second featured entry, a featured
+//   entry further down, or a `featured` value that is not a boolean fails.
 // - A1 guard: a committed bundle at public/<slug>/ whose record 404s fails
 //   the deploy build. In PR CI (HUB_GUARD=pr) it fails only when the PR's
 //   own diff touches public/<slug>/ (HUB_PR_TOUCHED, space-separated slugs);
@@ -81,7 +85,26 @@ export function hasBundle(slug, { bundleExists, publicRoot = 'public' } = {}) {
   return complete;
 }
 
+export function checkFeatured(entries) {
+  for (const [i, e] of entries.entries()) {
+    if (e === null || typeof e !== 'object' || Array.isArray(e)) {
+      throw new Error(`exhibits.yaml: entry ${i + 1} is not a mapping (write \`- slug: <slug>\`)`);
+    }
+    if ('featured' in e && typeof e.featured !== 'boolean') {
+      throw new Error(`exhibits.yaml: ${e.slug}: featured must be true or false, not ${JSON.stringify(e.featured)}`);
+    }
+  }
+  const featured = entries.filter((e) => e?.featured === true).map((e) => e.slug);
+  if (featured.length > 1) {
+    throw new Error(`exhibits.yaml: more than one featured exhibit (${featured.join(', ')})`);
+  }
+  if (featured.length === 1 && entries[0]?.featured !== true) {
+    throw new Error(`exhibits.yaml: the featured exhibit ${featured[0]} must be listed first`);
+  }
+}
+
 export async function collect(entries, opts = {}) {
+  checkFeatured(entries);
   const shown = [];
   for (const entry of entries) {
     const snap = await readSnapshot(entry, opts.fetchImpl);
@@ -91,7 +114,12 @@ export async function collect(entries, opts = {}) {
       continue;
     }
     verify(entry.slug, snap.body);
-    shown.push({ slug: entry.slug, ...snap.body, has_bundle: hasBundle(entry.slug, opts) });
+    shown.push({
+      slug: entry.slug,
+      ...snap.body,
+      has_bundle: hasBundle(entry.slug, opts),
+      featured: entry.featured === true,
+    });
   }
   return shown;
 }

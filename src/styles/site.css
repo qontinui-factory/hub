@@ -32,6 +32,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
 .exhibit { background: var(--panel); border: 1px solid var(--rail); border-radius: 12px; padding: 20px; margin: 16px 0; }
 .exhibit header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
 .exhibit h3 { margin: 0; }
+.exhibit.featured { border-color: var(--glow); }
+.featured-label { font-size: .75rem; color: var(--glow); text-transform: uppercase; letter-spacing: .06em; }
 .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
 .fact { border-left: 2px solid var(--glow); padding-left: 10px; }
 .fact dt { font-size: .75rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
@@ -45,7 +47,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
 .stamp { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .stamp.pass { background: var(--ok); }
 .stamp.rework { background: var(--act); }
-.stamps.not-recorded, .gaps { color: var(--unknown); font-size: .875rem; }
+.stamps.not-recorded { color: var(--unknown); font-size: .875rem; }
+.gaps { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+/* Dimmed by colour, not opacity: --ink-3 on --panel keeps AA contrast. */
+.gap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 6px 12px; border: 1px dashed var(--unknown); border-radius: 8px; color: var(--ink-3); font-size: .875rem; }
+.gap code { color: var(--ink-2); word-break: break-word; }
 .bundle { margin: 12px 0 0; font-size: .875rem; }
 .verify { margin-top: 12px; color: var(--ink-2); font-size: .875rem; }
 .verify code { word-break: break-all; }

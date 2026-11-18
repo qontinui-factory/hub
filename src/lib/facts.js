@@ -35,6 +35,13 @@ export function line(doc) {
   }));
 }
 
+// What the record does not know. Each unknowns[] entry is "<field>: <reason>";
+// the gallery shows it as a dimmed station marked "not recorded", with coord's
+// reason in words, and never fills the value in (creative direction).
 export function unknowns(doc) {
-  return (doc.unknowns ?? []).map((u) => u.split(': ')[0]);
+  return (doc.unknowns ?? []).map((u) => {
+    const at = u.indexOf(': ');
+    if (at === -1) return { field: u, reason: null };
+    return { field: u.slice(0, at), reason: u.slice(at + 2).replaceAll('_', ' ') };
+  });
 }

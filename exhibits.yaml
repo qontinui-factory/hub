@@ -2,6 +2,11 @@
 # `hub publish` appends a slug; `hub unpublish` removes it (AI2, B6).
 # Every exhibit is read live from its public build record. The Phase 1
 # fixture (fixtures/example-widget.json, A4) stays for the tests only.
+# `featured: true` marks the one featured exhibit; list it first.
+# Portofino is published by its own tenant (pizzeria) and has no launch
+# bundle here, so its exhibit links to no /portofino/ page (AI4.6).
 exhibits:
+  - slug: portofino
+    featured: true
   - slug: qontinui-studio
   - slug: qontinui-factory-hub

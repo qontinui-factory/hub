@@ -20,6 +20,15 @@ pnpm test
   `public/<slug>/` whose record is not published fails the deploy build.
 - An exhibit links to `/<slug>/` and its `how-it-was-built.html` when
   `public/<slug>/` holds both pages. Otherwise it shows no link.
+- `featured: true` on one entry marks the featured exhibit. The file's order
+  is the gallery's order, and the featured entry must come first. A second
+  featured entry, a featured entry further down, or a `featured` value that is
+  not `true` or `false` fails the build.
+- Each `unknowns[]` entry in a record is shown as a dimmed station marked
+  "not recorded", with the field and coord's reason.
+- Portofino's record belongs to the `pizzeria` tenant and has no launch bundle
+  here. It is published under that tenant's own credential, not with
+  `hub record-publish`.
 - `/_hub/ui-bridge.js` mounts the UI Bridge on every page. It connects to a
   relay only when a verifier sets `window.__QONTINUI_UI_BRIDGE_RELAY__` to a
   `127.0.0.1` URL before the page loads; an ordinary visitor's page opens no

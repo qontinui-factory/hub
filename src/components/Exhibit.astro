@@ -6,9 +6,10 @@ const board = counterBoard(doc);
 const parts = line(doc);
 const gaps = unknowns(doc);
 ---
-<article class="exhibit" data-exhibit={exhibit.slug}>
+<article class={exhibit.featured ? 'exhibit featured' : 'exhibit'} data-exhibit={exhibit.slug}>
   <header>
     <h3 data-exhibit={exhibit.slug}>{doc.product.title}</h3>
+    {exhibit.featured && <span class="featured-label">Featured</span>}
   </header>
   <dl class="board">
     {board.map((f) => (
@@ -30,7 +31,16 @@ const gaps = unknowns(doc);
       </li>
     ))}
   </ol>
-  {gaps.length > 0 && <p class="gaps">Not recorded: {gaps.join(', ')}.</p>}
+  {gaps.length > 0 && (
+    <ol class="gaps" role="list" aria-label="What this record does not know">
+      {gaps.map((g) => (
+        <li class="gap">
+          <span class="gap-label"><code>{g.field}</code>{g.reason && <span class="gap-reason"> — {g.reason}</span>}</span>{' '}
+          <span class="stamps not-recorded">not recorded</span>
+        </li>
+      ))}
+    </ol>
+  )}
   {exhibit.has_bundle && (
     <p class="bundle">
       <a href={`/${exhibit.slug}/`}>Launch page</a> · <a href={`/${exhibit.slug}/how-it-was-built.html`}>How it was built</a>
